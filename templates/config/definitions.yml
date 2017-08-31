@@ -1,0 +1,12 @@
+deployer:
+  user: 
+  host:
+    staging: 
+    production: 
+  root: 
+  fqdn: 
+    staging: 
+    production: 
+app:
+  name:
+  repo:

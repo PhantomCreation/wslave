@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+require 'thor'
+require 'fileutils'
+
+class WSlaveCLI < Thor
+
+  desc 'new [APP_PATH]', "Generate a new app at APP_PATH"
+  long_desc "Creates a new application in the current directory or in the specificed path."
+  method_option :version, default: ''
+  def new(path = './')
+    require_relative '../lib/wslave_new'
+    real_path = File.expand_path(path)
+    WSlaveNew.new(real_path, options['version'])
+  end
+
+  desc 'sage NAME', "Generate a theme with NAME"
+  long_desc "Generates a theme base with sage in the themes directory with the given" \
+    "NAME. A random name will be generated if you do not specify a NAME."
+  method_option :version, default: ''
+  def sage(name = '')
+    if name == ''
+      require 'haikunator'
+      name = Haikunator.haikunate(0)
+    end
+    puts "Generating sage theme base for #{name}"
+    require_relative '../lib/wslave_sage'
+    WSlaveSage.new(name, options['version'])
+  end
+
+  desc 'server', "Starts the development server"
+  method_option :f, default: false, description: 'force close other servers first'
+  def server()
+    puts 'Starting server...'
+    require_relative '../lib/wslave_docker'
+    WSlaveDocker.new().server(options['f'])
+  end
+
+  desc 'stop [options]', "Stops the development server"
+  method_option :v, default: false, description: 'remove volume data'
+  method_option :f, default: false, description: 'force close other servers first'
+  def stop()
+    puts 'Stopping server...'
+    require_relative '../lib/wslave_docker'
+    WSlaveDocker.new().stop(options['f'], options['v'])
+  end
+
+  desc 'sync', "Synchronizes submodules and file permissions"
+  def sync()
+    require_relative '../lib/wslave_tools'
+    puts 'Synchronizing...'
+    WSlaveTools.sync()
+  end
+
+  desc 'version', "Prints the version of the installed WSlave"
+  def version()
+    require 'rubygems'
+    spec = Gem::Specification::load("#{__dir__}/../wslave.gemspec")
+    puts spec.version
+  end
+end
+
+WSlaveCLI.start(ARGV)

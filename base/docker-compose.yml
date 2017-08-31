@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - "./db/dev:/db"
+      - "./db/active:/docker-entrypoint-initdb.d"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+
+  web:
+    depends_on:
+      - db
+    build: .
+    volumes:
+      - "./public:/var/www/html"
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_PASSWORD: wordpress
+volumes:
+    db_data:
+      driver: local

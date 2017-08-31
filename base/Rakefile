@@ -1,0 +1,45 @@
+require 'fileutils'
+
+def rm_dbfile(profile)
+  puts "Deleting db/#{profile}/wordpress.sql"
+  FileUtils.rm("db/#{profile}/wordpress.sql") if File.exist?("db/#{profile}/wordpress.sql")
+end
+
+namespace :db do
+  namespace :dev do
+    desc 'Backup development container database to db/dev (container must be running)'
+    task :backup do
+      rm_dbfile('dev')
+      puts "Creating backup of development database..."
+      sh 'docker-compose exec db sh -c "exec mysqldump --single-transaction -hlocalhost -uroot -pwordpress wordpress > /db/wordpress.sql"'
+    end
+
+    desc 'Set the development container database image to the active image'
+    task :activate do
+      rm_dbfile('active')
+      FileUtils.cp('db/dev/wordpress.sql', 'db/active/wordpress.sql')
+    end
+  end
+
+  desc 'Backup and activate the development container database (container must be running)'
+  task :dev do
+    Rake::Task['db:dev:backup'].invoke
+    Rake::Task['db:dev:activate'].invoke
+  end
+
+  namespace :staging do
+    desc 'Set the staging database backup to the active database'
+    task :activate do
+      rm_dbfile('active')
+      FileUtils.cp('db/staging/wordpress.sql', 'db/active/wordpress.sql')
+    end
+  end
+
+  namespace :production do
+    desc 'Set the production database backup to the active database'
+    task :activate do
+      rm_dbfile('active')
+      FileUtils.cp('db/production/wordpress.sql', 'db/active/wordpress.sql')
+    end
+  end
+end
