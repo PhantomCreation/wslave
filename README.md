@@ -165,7 +165,7 @@ wslave --help
 rake -T
 ```
 ```
-cap -T
+cap production -T
 ```
 
 License

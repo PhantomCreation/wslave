@@ -66,6 +66,7 @@ namespace :deploy do
     end
   end
 
+  desc 'Preform special seed tasks required on intial seed'
   task :initial do
     on roles(:web) do
       invoke('deploy:check:directories')
@@ -99,6 +100,7 @@ namespace :db do
     end
   end
 
+  desc 'Seed the "active" database'
   task :seed do
     on roles(:web) do
       if File.exist? 'db/active/wordpress.sql'
@@ -121,6 +123,7 @@ namespace :data do
   end
 end
 
+desc 'Backup DB and remote uploads/content'
 task :backup do
   invoke('db:backup')
   invoke('data:backup')
