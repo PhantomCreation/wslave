@@ -34,6 +34,11 @@ class WSlaveDocker
 
   # Sometimes the docker container or a windows fs will screw up or delete .htaccess
   def _unfuck_dot_htaccess()
-    FileUtils.cp_r("#{__dir__}/../base/public/.htaccess", "./public/.htaccess")
+    begin
+      FileUtils.cp_r("#{__dir__}/../base/public/.htaccess", "./public/.htaccess")
+      FileUtils.chmod(0444, "./public/.htaccess")
+    rescue => e
+      # noop
+    end
   end
 end
