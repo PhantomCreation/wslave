@@ -6,14 +6,16 @@ class WSlaveNew
   def initialize(path, version)
     puts '⚙ Initializing Toolchain・・・'
 
-    tc_path = File.expand_path "#{__dir__}/../base/"
+    base_path = File.expand_path "#{__dir__}/../base/"
+    template_path = File.expand_path "#{__dir__}/../templates/"
 
     FileUtils.mkdir_p path
 
     Dir.chdir path
     
     puts "  > Setting up WordPress WSlave setup in: #{path}"
-    FileUtils.cp_r Dir.glob("#{tc_path}/*"), path
+    FileUtils.cp_r Dir.glob("#{base_path}/*"), path
+    FileUtils.cp_r Dir.glob("#{template_path}/*"), path
 
     spec = Gem::Specification::load("#{__dir__}/../wslave.gemspec")
     File.open("#{path}/config/.wslave", 'w') {|f| f.write(spec.version)}

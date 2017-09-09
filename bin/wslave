@@ -13,6 +13,13 @@ class WSlaveCLI < Thor
     WSlaveNew.new(real_path, options['version'])
   end
 
+  desc 'update', "Updates toolchain"
+  long_desc "Updates toolchain. Will not overwrite existing configuration files."
+  def update()
+    require_relative '../lib/wslave_update'
+    WSlaveUpdate.new()
+  end
+
   desc 'sage NAME', "Generate a theme with NAME"
   long_desc "Generates a theme base with sage in the themes directory with the given" \
     "NAME. A random name will be generated if you do not specify a NAME."
