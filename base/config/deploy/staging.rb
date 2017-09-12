@@ -30,43 +30,49 @@ namespace :deploy do
     end
   end
 
-  task :upload_wp do
-    on roles(:web) do
-      upload! './public/wordpress', "#{deploy_path}/shared/public/", recursive: true
-    end
-  end
-
+  desc 'Syncs the wordpress directory with rsync'
   task :sync_wp do
     on roles(:web) do
       `rsync -avzPhu --delete ./public/wordpress/ #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wordpress/`
     end
   end
 
-  task :sync_content do
+  desc 'Uploads the uploads directory'
+  task :upload_wp do
+    on roles(:web) do
+      upload! './public/wordpress', "#{deploy_path}/shared/public/", recursive: true
+    end
+  end
+
+  desc 'Syncs the uploads directory with rsync'
+  task :sync_uploads do
     on roles(:web) do
       `rsync -avzPhu --delete ./public/wp-content/uploads/ #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads/`
     end
   end
 
-  task :upload_content do
+  desc 'Uploads the uploads directory'
+  task :upload_uploads do
     on roles(:web) do
       upload! './public/wp-content/uploads', "#{deploy_path}/shared/public/wp-content/", recursive: true
     end
   end
 
+  desc 'Syncs the plugins directory with rsync'
   task :sync_plugins do
     on roles(:web) do
-      `rsync -avzPhu --delete ./public/wp-content/plugins/ #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/plugins/`
+      `rsync -avzPhu --delete ./public/wp-content/plugins/ #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins/`
     end
   end
 
+  desc 'Uploads the plugins directory'
   task :upload_plugins do
     on roles(:web) do
-      upload! './public/wp-content/plugins', "#{deploy_path}/shared/public/", recursive: true
+      upload! './public/wp-content/plugins', "#{deploy_path}/shared/public/wp-content/", recursive: true
     end
   end
 
-  desc 'Preform special seed tasks required on intial seed'
+  desc 'Perform special seed tasks required on intial seed'
   task :initial do
     on roles(:web) do
       invoke('deploy:check:directories')
@@ -74,7 +80,7 @@ namespace :deploy do
       invoke('deploy:check:make_linked_dirs')
       invoke('deploy:wp_config')
       invoke('deploy:upload_wp')
-      invoke('deploy:upload_content')
+      invoke('deploy:upload_uploads')
       invoke('deploy')
       invoke('db:seed')
     end
