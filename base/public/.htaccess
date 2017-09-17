@@ -2,7 +2,6 @@
   RewriteEngine On
   RewriteBase /
 
-  # BEGIN WordPress
   RewriteRule ^$ wordpress/index.php [L]
 
   # Skip real files and directories
@@ -11,5 +10,7 @@
 
   # Otherwise send it to WordPress
   RewriteRule .* wordpress/index.php [L]
+
+  # BEGIN WordPress
   # END WordPress
 </IfModule>

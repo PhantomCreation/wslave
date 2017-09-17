@@ -43,3 +43,21 @@ namespace :db do
     end
   end
 end
+
+namespace :staging do
+  desc 'Open an SSH session to the staging host in the staging directory'
+  task :ssh do
+    require 'yaml'
+    opts = YAML.load_file('config/definitions.yml')
+    exec("ssh #{opts['deployer']['user']}@#{opts['deployer']['host']['staging']} -t \"cd #{opts['deployer']['root']}/#{opts['deployer']['fqdn']['staging']}; exec \$SHELL -l\"")
+  end
+end
+
+namespace :production do
+  desc 'Open an SSH session to the staging host in the production directory'
+  task :ssh do
+    require 'yaml'
+    opts = YAML.load_file('config/definitions.yml')
+    exec("ssh #{opts['deployer']['user']}@#{opts['deployer']['host']['production']} -t \"cd #{opts['deployer']['root']}/#{opts['deployer']['fqdn']['production']}; exec \$SHELL -l\"")
+  end
+end

@@ -23,6 +23,7 @@ class WSlaveUpdate
     FileUtils.cp("#{base_path}/Rakefile", "#{path}/Rakefile")
     FileUtils.cp("#{base_path}/Dockerfile", "#{path}/Dockerfile")
     FileUtils.cp("#{base_path}/docker-compose.yml", "#{path}/docker-compose.yml")
+    FileUtils.cp("#{base_path}/public/.htaccess", "#{path}/public/.htaccess")
     FileUtils.cp_r(Dir.glob("#{base_path}/config/*"), "#{path}/config")
     FileUtils.cp("#{template_path}/config/database.yml", "#{path}/config/database.yml") unless File.exist?  "#{path}/config/database.yml"
     FileUtils.cp("#{template_path}/config/definitions.yml", "#{path}/config/definitions.yml") unless File.exist?  "#{path}/config/definitions.yml"
