@@ -5,8 +5,8 @@ require 'yaml'
 opts = YAML.load_file('config/definitions.yml')
 
 deploy_method = 'git-with-submodules'
-deploy_method = opts['options']['deploy_method'] if opts.has_key? 'options' &&
-  opts['options'].has_key? 'deploy_method'
+deploy_method = opts['options']['deploy_method'] if (opts.has_key?('options') &&
+  opts['options'].has_key?('deploy_method'))
 
 case deploy_method
 when 'scp'
