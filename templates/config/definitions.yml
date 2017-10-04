@@ -10,3 +10,5 @@ deployer:
 app:
   name:
   repo:
+options:
+  deploy_method: git-with-submodules # Choose from: git-with-submodules, git, scp

@@ -1,10 +1,24 @@
-require "capistrano/setup"
+require 'capistrano/setup'
+require 'capistrano/deploy'
+require 'yaml'
 
-require "capistrano/deploy"
+opts = YAML.load_file('config/definitions.yml')
 
-require "capistrano/scm/git"
-install_plugin Capistrano::SCM::Git
-require "capistrano/scm/git-with-submodules"
-install_plugin Capistrano::SCM::Git::WithSubmodules
+deploy_method = 'git-with-submodules'
+deploy_method = opts['options']['deploy_method'] if opts.has_key? 'options' &&
+  opts['options'].has_key? 'deploy_method'
+
+case deploy_method
+when 'scp'
+  require 'capistrano/copy'
+when 'git'
+  require 'capistrano/scm/git'
+  install_plugin Capistrano::SCM::Git
+else
+  require 'capistrano/scm/git'
+  install_plugin Capistrano::SCM::Git
+  require 'capistrano/scm/git-with-submodules'
+  install_plugin Capistrano::SCM::Git::WithSubmodules
+end
 
 Dir.glob("lib/capistrano/tasks/*.rake").each { |r| import r }
