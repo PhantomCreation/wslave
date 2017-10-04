@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'capistrano', '= 3.9.1'
   s.add_dependency 'capistrano-git-with-submodules', '~> 2.0'
-  s.add_dependency 'capistrano-git-with-submodules', '~> 2.0'
   s.add_dependency 'capistrano-scm-copy', '~> 0.7'
 
   s.add_dependency 'thor', '~> 0.20'
