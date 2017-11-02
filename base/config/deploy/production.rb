@@ -80,6 +80,7 @@ namespace :deploy do
       invoke('deploy:check:make_linked_dirs')
       invoke('deploy:wp_config')
       invoke('deploy:upload_wp')
+      invoke('deploy:upload_plugins')
       invoke('deploy:upload_uploads')
       invoke('deploy')
       invoke('db:seed')

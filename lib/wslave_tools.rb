@@ -13,9 +13,13 @@ class WSlaveTools
   def self.set_dev_perms
     begin
       FileUtils.chown(nil, 'www-data', 'public/wp-content/themes')
+      FileUtils.chmod(0775, 'public/wp-content/themes')
       FileUtils.chown(nil, 'www-data', 'public/wp-content/uploads')
+      FileUtils.chmod(0775, 'public/wp-content/uploads')
       FileUtils.chown(nil, 'www-data', 'public/wp-content/plugins')
+      FileUtils.chmod(0775, 'public/wp-content/plugins')
       FileUtils.chown(nil, 'www-data', 'public/wp-content/upgrade')
+      FileUtils.chmod(0775, 'public/wp-content/upgrade')
     rescue Errno::EPERM
       puts "!!!WARNING!!! Your user does not belong to the www-data group!\n" \
         " >>> Unable to make folders writable for devlopment. <<<\n" \
