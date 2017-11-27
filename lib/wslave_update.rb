@@ -19,7 +19,7 @@ class WSlaveUpdate
     Dir.chdir path
     
     FileUtils.cp("#{base_path}/Capfile", "#{path}/Capfile")
-    FileUtils.cp("#{base_path}/Gemfile", "#{path}/Gemfile")
+    # FileUtils.cp("#{base_path}/Gemfile", "#{path}/Gemfile")
     FileUtils.cp("#{base_path}/Rakefile", "#{path}/Rakefile")
     FileUtils.cp("#{base_path}/Dockerfile", "#{path}/Dockerfile")
     FileUtils.cp("#{base_path}/docker-compose.yml", "#{path}/docker-compose.yml")
