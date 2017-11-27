@@ -36,7 +36,7 @@ class WSlaveDocker
   def _unfuck_dot_htaccess()
     begin
       FileUtils.cp_r("#{__dir__}/../base/public/.htaccess", "./public/.htaccess")
-      FileUtils.chmod(0444, "./public/.htaccess")
+      # FileUtils.chmod(0444, "./public/.htaccess")
     rescue => e
       # noop
     end
