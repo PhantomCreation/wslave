@@ -10,8 +10,10 @@ namespace :db do
     desc 'Backup development container database to db/dev (container must be running)'
     task :backup do
       rm_dbfile('dev')
-      puts "Creating backup of development database..."
+      puts 'Creating backup of development database...'
       sh 'docker-compose exec db sh -c "exec mysqldump --single-transaction -hlocalhost -uroot -pwordpress wordpress > /db/wordpress.sql"'
+      sh 'docker-compose exec db sh -c "chown :www-data /db/wordpress.sql"'
+      sh 'docker-compose exec db sh -c "chmod 664 /db/wordpress.sql"'
     end
 
     desc 'Set the development container database image to the active image'

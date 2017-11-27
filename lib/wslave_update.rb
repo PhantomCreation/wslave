@@ -33,6 +33,6 @@ class WSlaveUpdate
     File.open("#{path}/config/.wslave", 'w') {|f| f.write(spec.version)}
 
     Dir.chdir path
-    WSlaveTools.set_dev_perms 
+    WSlaveTools.set_dev_perms(path) 
   end
 end
