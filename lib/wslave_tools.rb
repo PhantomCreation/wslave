@@ -13,8 +13,8 @@ class WSlaveTools
   def self.set_dev_perms(path = '.')
     begin
       unless Dir.exist?("#{path}/public/wp-content/upgrade")
-        fileutils.mkdir("#{path}/public/wp-content/upgrade")
-        fileutils.touch("#{path}/public/wp-content/upgrade/.gitkeep")
+        FileUtils.mkdir("#{path}/public/wp-content/upgrade")
+        FileUtils.touch("#{path}/public/wp-content/upgrade/.gitkeep")
       end
       FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/themes")
       FileUtils.chmod(0775, "#{path}/public/wp-content/themes")
