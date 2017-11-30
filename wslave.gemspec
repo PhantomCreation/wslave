@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'wslave'
-  s.version     = '0.0.13'
+  s.version     = '0.0.14'
   s.licenses     = ['GPL-3.0', 'AGPL-3.0']
   s.summary     = '"Word Slave" generates and controls a WordPress installation'
   s.description = 'Word Slave includes the wslave command and a control library to generate a ' \
@@ -13,8 +13,8 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0.0'
   s.files =       Dir.glob('lib/**/*.rb', File::FNM_DOTMATCH) +
                   Dir.glob('bin/**/*.rb', File::FNM_DOTMATCH) +
-                  Dir.glob('base/**/*', File::FNM_DOTMATCH) +
-                  Dir.glob('templates/**/*', File::FNM_DOTMATCH) +
+                  Dir.glob("base/**/*[^(.swp|.swo|.orig)]$", File::FNM_DOTMATCH) +
+                  Dir.glob("templates/**/*[^(.swp|.swo|.orig)]$", File::FNM_DOTMATCH) +
                   ['wslave.gemspec']
   s.require_paths = ['lib']
   s.bindir = 'bin'

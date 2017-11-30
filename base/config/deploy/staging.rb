@@ -75,15 +75,36 @@ namespace :deploy do
   desc 'Perform special seed tasks required on intial seed'
   task :initial do
     on roles(:web) do
-      invoke('deploy:check:directories')
-      invoke('deploy:check:linked_dirs')
-      invoke('deploy:check:make_linked_dirs')
+      invoke!('deploy:check:directories')
+      invoke!('deploy:check:linked_dirs')
+      invoke!('deploy:check:make_linked_dirs')
       invoke('deploy:wp_config')
-      invoke('deploy:upload_wp')
-      invoke('deploy:upload_plugins')
-      invoke('deploy:upload_uploads')
+      if (opts.include?('options') && opts['options'].include?('rsync_enabled') && 
+          opts['options']['rsync_enabled'] == false)
+        invoke('deploy:upload_wp')
+        invoke('deploy:upload_plugins')
+        invoke('deploy:upload_uploads')
+      else
+        invoke('deploy:sync_wp')
+        invoke('deploy:sync_plugins')
+        invoke('deploy:sync_uploads')
+      end
       invoke('deploy')
       invoke('db:seed')
+    end
+  end
+
+  desc 'Clear out remote DB tables and delete all remote files in deploy target directory'
+  task :destruct do
+    on roles(:web) do
+      execute "mysqldump --opt --user=#{db_info['staging']['username']} " \
+        "--password=#{db_info['staging']['password']} --host=#{db_info['staging']['host']} " \
+        "--add-drop-table --no-data #{db_info['staging']['database']} | " \
+        "grep -e '^DROP \| FOREIGN_KEY_CHECKS' | mysql -u#{db_info['staging']['username']} " \
+        "-p#{db_info['staging']['password']} -h#{db_info['staging']['host']} " \
+        "#{db_info['staging']['database']}"
+
+      execute "rm -rf #{deploy_path}/*"
     end
   end
 end

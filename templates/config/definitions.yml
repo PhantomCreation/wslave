@@ -11,4 +11,7 @@ app:
   name:
   repo:
 options:
-  deploy_method: git-with-submodules # Choose from: git-with-submodules, git, scp
+  # Choose from: git-with-submodules, git, scp
+  deploy_method: git-with-submodules
+  # Use rsync to upload auxialiary content files (set to false if your server doesn't support rsync)
+  rsync_enabled: true
