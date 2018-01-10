@@ -168,6 +168,17 @@ rake -T
 cap production -T
 ```
 
+Caution
+=======
+1. URL replacement: WordPress doesn't use relative paths and hard-codes URLs in the database 
+  (which is a terrible way to manage URLs and should be refactored in WP core...). Because of 
+  this we need to replace URL entries depending on where we are running the site. During 
+  development this is localhost:8000, so all the Staging and Production URLs get changed to 
+  localhost:8000, and then these localhost:8000 entries are converted to production or staging 
+  URLs on deployment. If you have an article or something that explicitly used localhost:8000 
+  this would end up getting changed to the production or staging URL during deployment.
+
+
 License
 =======
 AGPL version 3 and GPL version 3. Please contact info@phantom.industries if you want a commercial 

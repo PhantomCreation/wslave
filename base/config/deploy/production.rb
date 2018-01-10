@@ -1,4 +1,5 @@
 require 'yaml'
+require 'date'
 
 opts = YAML.load_file('config/definitions.yml')
 db_info = YAML.load_file('config/database.yml')
@@ -7,6 +8,9 @@ deploy_user = opts['deployer']['user']
 host_addr = opts['deployer']['host']['production']
 multisite_root = opts['deployer']['root']
 site_fqdn = opts['deployer']['fqdn']['production']
+
+disable_rsync = (opts.include?('options') && opts['options'].include?('rsync_enabled') && 
+          opts['options']['rsync_enabled'] == false)
 
 role :web, "#{deploy_user}@#{host_addr}" 
 
@@ -72,6 +76,37 @@ namespace :deploy do
     end
   end
 
+  desc 'Finds and replaces localhost:8000 and your Staging address with the Production address'
+  task :chikan do
+    on roles(:web) do
+      cmd_head = "mysql -h#{db_info['production']['host']} -u#{db_info['production']['username']} -p#{db_info['production']['password']} #{db_info['production']['database']}"
+
+      tables_x_fields = [
+        ['wp_commentmeta',   'meta_value'],
+        ['wp_comments',      'comment_content'],
+        ['wp_links',         'link_description'],
+        ['wp_options',       'option_value'],
+        ['wp_postmeta',      'meta_value'],
+        ['wp_posts',         'post_content'],
+        ['wp_posts',         'post_title'],
+        ['wp_posts',         'post_excerpt'],
+        ['wp_term_taxonomy', 'description'],
+        ['wp_usermeta',      'meta_value']
+      ]
+
+      # For localhost:8000 entries
+      tables_x_fields.each do |tf|
+        excute "#{cmd_head} -e \"UPDATE #{tf.first} SET #{tf.second} = REPLACE(#{tf.second}, 'localhost:8000', '#{site_fqdn}')\""
+      end
+
+      # For staging entires
+      staging_addr = opts['deployer']['fqdn']['staging'].strip
+      if staging_addr != ''
+        #excute "#{cmd_head} -c UPDATE #{tf.first} SET #{tf.second} = REPLACE(#{tf.second}, '', '#{site_fqdn}')"
+      end
+    end
+  end
+
   desc 'Perform special seed tasks required on intial seed'
   task :initial do
     on roles(:web) do
@@ -79,8 +114,7 @@ namespace :deploy do
       invoke!('deploy:check:linked_dirs')
       invoke!('deploy:check:make_linked_dirs')
       invoke('deploy:wp_config')
-      if (opts.include?('options') && opts['options'].include?('rsync_enabled') && 
-          opts['options']['rsync_enabled'] == false)
+      if disable_rsync
         invoke('deploy:upload_wp')
         invoke('deploy:upload_plugins')
         invoke('deploy:upload_uploads')
@@ -149,10 +183,24 @@ namespace :data do
       download! "#{deploy_path}/shared/public/wp-content/upgrade", "./public/wp-content/", recursive: true
     end
   end
+
+  desc "Backup data with rsync"
+  task :sync_backup do
+    on roles(:web) do
+      puts "Syncing Backup..."
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads/ ./public/wp-content/uploads/`
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins/ ./public/wp-content/plugins/`
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/upgrade/ ./public/wp-content/upgrade/`
+    end
+  end
 end
 
 desc 'Backup DB and remote uploads/content'
 task :backup do
   invoke('db:backup')
-  invoke('data:backup')
+  if disable_rsync
+    invoke('data:backup')
+  else
+    invoke('data:sync_backup')
+  end
 end

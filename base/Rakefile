@@ -1,4 +1,7 @@
 require 'fileutils'
+require 'yaml'
+
+@opts = YAML.load_file('config/definitions.yml')
 
 def rm_dbfile(profile)
   puts "Deleting db/#{profile}/wordpress.sql"
@@ -34,6 +37,7 @@ namespace :db do
     task :activate do
       rm_dbfile('active')
       FileUtils.cp('db/staging/wordpress.sql', 'db/active/wordpress.sql')
+      _replace_active_urls
     end
   end
 
@@ -42,24 +46,36 @@ namespace :db do
     task :activate do
       rm_dbfile('active')
       FileUtils.cp('db/production/wordpress.sql', 'db/active/wordpress.sql')
+      _replace_active_urls
     end
+  end
+
+  # Converts staging and production URL entries in DB backup with localhost:8000
+  def _replace_active_urls()
+    puts 'Replacing Production and Staging URLs for local development/re-deployment...'
+    db_data = File.read('db/active/wordpress.sql')
+
+    if @opts['deployer']['fqdn']['staging'] != ''
+      db_data = db_data.gsub(/#{@opts['deployer']['fqdn']['staging']}/, 'localhost:8000')
+    end
+    if @opts['deployer']['fqdn']['production'] != ''
+      db_data = db_data.gsub(/#{@opts['deployer']['fqdn']['production']}/, 'localhost:8000')
+    end
+
+    File.open('db/active/wordpress.sql', "w") {|file| file.puts db_data }
   end
 end
 
 namespace :staging do
   desc 'Open an SSH session to the staging host in the staging directory'
   task :ssh do
-    require 'yaml'
-    opts = YAML.load_file('config/definitions.yml')
-    exec("ssh #{opts['deployer']['user']}@#{opts['deployer']['host']['staging']} -t \"cd #{opts['deployer']['root']}/#{opts['deployer']['fqdn']['staging']}; exec \$SHELL -l\"")
+    exec("ssh #{@opts['deployer']['user']}@#{@opts['deployer']['host']['staging']} -t \"cd #{@opts['deployer']['root']}/#{@opts['deployer']['fqdn']['staging']}; exec \$SHELL -l\"")
   end
 end
 
 namespace :production do
   desc 'Open an SSH session to the staging host in the production directory'
   task :ssh do
-    require 'yaml'
-    opts = YAML.load_file('config/definitions.yml')
-    exec("ssh #{opts['deployer']['user']}@#{opts['deployer']['host']['production']} -t \"cd #{opts['deployer']['root']}/#{opts['deployer']['fqdn']['production']}; exec \$SHELL -l\"")
+    exec("ssh #{@opts['deployer']['user']}@#{@opts['deployer']['host']['production']} -t \"cd #{@opts['deployer']['root']}/#{@opts['deployer']['fqdn']['production']}; exec \$SHELL -l\"")
   end
 end
