@@ -79,31 +79,30 @@ namespace :deploy do
   desc 'Finds and replaces localhost:8000 and your Staging address with the Production address'
   task :chikan do
     on roles(:web) do
-      cmd_head = "mysql -h#{db_info['production']['host']} -u#{db_info['production']['username']} -p#{db_info['production']['password']} #{db_info['production']['database']}"
+      puts 'Replacing localhost:8000 and Staging URLs with Production URLs...'
 
-      tables_x_fields = [
-        ['wp_commentmeta',   'meta_value'],
-        ['wp_comments',      'comment_content'],
-        ['wp_links',         'link_description'],
-        ['wp_options',       'option_value'],
-        ['wp_postmeta',      'meta_value'],
-        ['wp_posts',         'post_content'],
-        ['wp_posts',         'post_title'],
-        ['wp_posts',         'post_excerpt'],
-        ['wp_term_taxonomy', 'description'],
-        ['wp_usermeta',      'meta_value']
-      ]
+      # Create a backup, download it, and remove remote copy
+      execute "mkdir -p #{deploy_path}/db/tmp"
+      execute "mysqldump --opt --user=#{db_info['production']['username']} --password=#{db_info['production']['password']} --host=#{db_info['production']['host']} #{db_info['production']['database']} > #{deploy_path}/db/tmp/wordpress.sql"
+      FileUtils.mkdir_p('./db/tmp') unless Dir.exist?('./db/tmp')
+      download! "#{deploy_path}/db/tmp/wordpress.sql", "db/tmp/wordpress.sql"
+      execute "rm #{deploy_path}/db/tmp/*.sql"
 
-      # For localhost:8000 entries
-      tables_x_fields.each do |tf|
-        excute "#{cmd_head} -e \"UPDATE #{tf.first} SET #{tf.second} = REPLACE(#{tf.second}, 'localhost:8000', '#{site_fqdn}')\""
+      # Regex replace in file
+      db_data = File.read('db/tmp/wordpress.sql')
+
+      db_data = db_data.gsub(/localhost:8000/, "#{opts['deployer']['fqdn']['production']}")
+      if opts['deployer']['fqdn']['staging'] != ''
+        db_data = db_data.gsub(/#{opts['deployer']['fqdn']['staging']}/, "#{opts['deployer']['fqdn']['production']}")
       end
 
-      # For staging entires
-      staging_addr = opts['deployer']['fqdn']['staging'].strip
-      if staging_addr != ''
-        #excute "#{cmd_head} -c UPDATE #{tf.first} SET #{tf.second} = REPLACE(#{tf.second}, '', '#{site_fqdn}')"
-      end
+      File.open('db/tmp/wordpress.sql', "w") {|file| file.puts db_data }
+
+      # Upload file and seed
+      upload! 'db/tmp/wordpress.sql', "#{deploy_path}/db/tmp/wordpress.sql"
+      execute "mysql -h#{db_info['production']['host']} -u#{db_info['production']['username']} -p#{db_info['production']['password']} #{db_info['production']['database']} < #{deploy_path}/db/tmp/wordpress.sql"
+      execute "rm #{deploy_path}/db/tmp/*.sql"
+      `rm db/tmp/wordpress.sql`
     end
   end
 
@@ -125,6 +124,7 @@ namespace :deploy do
       end
       invoke('deploy')
       invoke('db:seed')
+      invoke('deploy:chikan')
     end
   end
 

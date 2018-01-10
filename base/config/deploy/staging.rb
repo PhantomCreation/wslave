@@ -76,7 +76,7 @@ namespace :deploy do
     end
   end
 
-  desc 'Finds and replaces localhost:8000 and your Staging address with the Production address'
+  desc 'Finds and replaces localhost:8000 and your Production address with the Staging address'
   task :chikan do
     on roles(:web) do
       puts 'Replacing localhost:8000 and Production URLs with Staging URLs...'
@@ -98,37 +98,11 @@ namespace :deploy do
 
       File.open('db/tmp/wordpress.sql', "w") {|file| file.puts db_data }
 
-      # Upload file
+      # Upload file and seed
       upload! 'db/tmp/wordpress.sql', "#{deploy_path}/db/tmp/wordpress.sql"
       execute "mysql -h#{db_info['staging']['host']} -u#{db_info['staging']['username']} -p#{db_info['staging']['password']} #{db_info['staging']['database']} < #{deploy_path}/db/tmp/wordpress.sql"
       execute "rm #{deploy_path}/db/tmp/*.sql"
       `rm db/tmp/wordpress.sql`
-
-     # cmd_head = "mysql -h#{db_info['production']['host']} -u#{db_info['production']['username']} -p#{db_info['production']['password']} #{db_info['production']['database']}"
-
-     # tables_x_fields = [
-     #   ['wp_commentmeta',   'meta_value'],
-     #   ['wp_comments',      'comment_content'],
-     #   ['wp_links',         'link_description'],
-     #   ['wp_options',       'option_value'],
-     #   ['wp_postmeta',      'meta_value'],
-     #   ['wp_posts',         'post_content'],
-     #   ['wp_posts',         'post_title'],
-     #   ['wp_posts',         'post_excerpt'],
-     #   ['wp_term_taxonomy', 'description'],
-     #   ['wp_usermeta',      'meta_value']
-     # ]
-
-     # # For localhost:8000 entries
-     # tables_x_fields.each do |tf|
-     #   execute "#{cmd_head} -e \"UPDATE #{tf[0]} SET #{tf[1]} = REPLACE(#{tf[1]}, 'localhost:8000', '#{site_fqdn}')\""
-     # end
-
-     # # For staging entires
-     # staging_addr = opts['deployer']['fqdn']['staging'].strip
-     # if staging_addr != ''
-     #   #excute "#{cmd_head} -c UPDATE #{tf.first} SET #{tf.second} = REPLACE(#{tf.second}, '', '#{site_fqdn}')"
-     # end
     end
   end
 
@@ -150,6 +124,7 @@ namespace :deploy do
       end
       invoke('deploy')
       invoke('db:seed')
+      invoke('deploy:chikan')
     end
   end
 
