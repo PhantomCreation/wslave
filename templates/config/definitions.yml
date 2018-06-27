@@ -1,5 +1,7 @@
 deployer:
-  user: 
+  user:
+  # Uncomment this line if you are not on a shared host/if your web server runs under a different user than what you specified in the user field above
+  # www_data_group: www-data
   host:
     staging: 
     production: 

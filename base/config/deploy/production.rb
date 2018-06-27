@@ -5,6 +5,7 @@ opts = YAML.load_file('config/definitions.yml')
 db_info = YAML.load_file('config/database.yml')
 
 deploy_user = opts['deployer']['user']
+deploy_group = opts['deployer']['www_data_group']
 host_addr = opts['deployer']['host']['production']
 multisite_root = opts['deployer']['root']
 site_fqdn = opts['deployer']['fqdn']['production']
@@ -79,7 +80,10 @@ namespace :deploy do
   desc 'Finds and replaces localhost:8000 and your Staging address with the Production address'
   task :chikan do
     on roles(:web) do
-      puts 'Replacing localhost:8000 and Staging URLs with Production URLs...'
+      puts 'Replacing localhost:8000 and Production URLs with Staging URLs...'
+
+      # Set an anchor to first homogonize instances of URL's, then replace all the anchors
+      anchor = "URL_REPLACEMENT_ANCHOR_00000"
 
       # Create a backup, download it, and remove remote copy
       execute "mkdir -p #{deploy_path}/db/tmp"
@@ -91,18 +95,45 @@ namespace :deploy do
       # Regex replace in file
       db_data = File.read('db/tmp/wordpress.sql')
 
-      db_data = db_data.gsub(/localhost:8000/, "#{opts['deployer']['fqdn']['production']}")
+      # This may seem roundabout, but in order to avoid mangling the target URL we need to first
+      # replace instances of it with something that won't match
+      db_data = db_data.gsub(/#{opts['deployer']['fqdn']['production']}/, anchor)
+
+      # Set staging URL's to the anchor
       if opts['deployer']['fqdn']['staging'] != ''
-        db_data = db_data.gsub(/#{opts['deployer']['fqdn']['staging']}/, "#{opts['deployer']['fqdn']['production']}")
+        db_data = db_data.gsub(/#{opts['deployer']['fqdn']['staging']}/, anchor)
       end
 
+      # Set localhost entries to the anchor
+      db_data = db_data.gsub(/localhost\%3A8000/, anchor)
+      db_data = db_data.gsub(/localhost:8000/, anchor)
+
+      # Replace anchors with the correct target URL
+      db_data = db_data.gsub(anchor, "#{opts['deployer']['fqdn']['production']}")
+
+      # Save results
       File.open('db/tmp/wordpress.sql', "w") {|file| file.puts db_data }
 
       # Upload file and seed
       upload! 'db/tmp/wordpress.sql', "#{deploy_path}/db/tmp/wordpress.sql"
       execute "mysql -h#{db_info['production']['host']} -u#{db_info['production']['username']} -p#{db_info['production']['password']} #{db_info['production']['database']} < #{deploy_path}/db/tmp/wordpress.sql"
       execute "rm #{deploy_path}/db/tmp/*.sql"
-      `rm db/tmp/wordpress.sql`
+
+      # Remove work file
+      # `rm db/tmp/wordpress.sql`
+    end
+  end
+
+  desc 'Sets ownership permissions'
+  task :set_permissions do
+    on roles(:web) do
+      puts 'Setting permissions'
+      if deploy_group != nil
+        puts "Recrusively setting group to #{deploy_group}..."
+        execute "chown -R :#{deploy_group} #{deploy_path}"
+        puts 'Allowing group level Write permission...'
+        execute "chmod -R g+w #{deploy_path}"
+      end
     end
   end
 
@@ -125,17 +156,19 @@ namespace :deploy do
       invoke('deploy')
       invoke('db:seed')
       invoke('deploy:chikan')
+      invoke('deploy:set_permissions')
     end
   end
 
   desc 'Clear out remote DB tables and delete all remote files in deploy target directory'
   task :destruct do
     on roles(:web) do
-      execute "mysqldump --opt --user=#{db_info['production']['username']} " \
+      execute "mysql --user=#{db_info['production']['username']} " \
         "--password=#{db_info['production']['password']} --host=#{db_info['production']['host']} " \
-        "--add-drop-table --no-data #{db_info['production']['database']} | " \
-        "grep -e '^DROP \| FOREIGN_KEY_CHECKS' | mysql -u#{db_info['production']['username']} " \
-        "-p#{db_info['production']['password']} -h#{db_info['production']['host']} " \
+        "-Nse 'show tables' #{db_info['production']['database']} | " \
+        "while read table; do echo \"drop table $table;\"; done | " \
+        "mysql --user=#{db_info['production']['username']} " \
+        "--password=#{db_info['production']['password']} --host=#{db_info['production']['host']} " \
         "#{db_info['production']['database']}"
 
       execute "rm -rf #{deploy_path}/*"
@@ -181,6 +214,7 @@ namespace :data do
       download! "#{deploy_path}/shared/public/wp-content/uploads", "./public/wp-content/", recursive: true
       download! "#{deploy_path}/shared/public/wp-content/plugins", "./public/wp-content/", recursive: true
       download! "#{deploy_path}/shared/public/wp-content/upgrade", "./public/wp-content/", recursive: true
+      download! "#{deploy_path}/current/public/wp-content/themes", "./public/wp-content/", recursive: true
     end
   end
 
@@ -191,6 +225,7 @@ namespace :data do
       `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads/ ./public/wp-content/uploads/`
       `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins/ ./public/wp-content/plugins/`
       `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/upgrade/ ./public/wp-content/upgrade/`
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/ ./public/wp-content/themes/`
     end
   end
 end
