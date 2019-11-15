@@ -25,6 +25,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'capistrano-scm-copy', '~> 0.7', '0.7.0'
   s.add_dependency 'capistrano-file-permissions', '~> 1.0', '1.0.0'
 
+  s.add_dependency 'git', '~> 1.5', '1.5.0'
+
   s.add_dependency 'thor', '~> 0.20', '0.20.3'
   s.add_dependency 'haikunator', '~> 1.1', '1.1.0'
 end
