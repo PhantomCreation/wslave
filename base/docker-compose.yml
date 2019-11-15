@@ -2,7 +2,7 @@ version: '3'
 
 services:
   db:
-    image: mysql:5.7
+    image: mariadb:10.4
     volumes:
       - "./db/dev:/db"
       - "./db/active:/docker-entrypoint-initdb.d"
