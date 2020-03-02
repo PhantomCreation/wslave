@@ -8,7 +8,7 @@ require_relative 'wslave_tools'
 class WSlaveNew
   def initialize(path, version = '', wspath = '')
     puts '⚙ Initializing Toolchain・・・'
-    
+
     if (wspath != '')
       manual_path = true
       if ((Pathname.new(wspath)).absolute?)
@@ -28,7 +28,7 @@ class WSlaveNew
     FileUtils.mkdir_p path
 
     Dir.chdir path
-    
+
     puts "  > Setting up WordPress WSlave setup in: #{path}"
     FileUtils.cp_r Dir.glob("#{base_path}/*"), path
     FileUtils.cp_r Dir.glob("#{template_path}/*"), path
@@ -51,15 +51,15 @@ class WSlaveNew
 
     puts "  > Preparing detached content directory"
     FileUtils.cp_r("#{path}/public/wordpress/wp-content", "#{path}/public/wp-content")
-    FileUtils.mkdir("#{path}/public/wp-content/uploads")
+    FileUtils.mkdir("#{path}/public/wp-content/uploads") unless Dir.exist?("#{path}/public/wp-content/uploads")
     FileUtils.touch("#{path}/public/wp-content/uploads/.gitkeep")
-    FileUtils.mkdir("#{path}/public/wp-content/upgrade")
+    FileUtils.mkdir("#{path}/public/wp-content/upgrade") unless Dir.exist?("#{path}/public/wp-content/upgrade")
     FileUtils.touch("#{path}/public/wp-content/upgrade/.gitkeep")
     Dir.chdir path
 
     puts "  > Setting permissions"
     WSlaveTools.set_dev_perms
-    
+
     `cd #{path} && git add --all && git commit -am "Add and initialize WordPress#{version}"`
     puts "  > Done!"
   end
@@ -73,7 +73,7 @@ class WSlaveNew
   def get_stable_branch_version(path)
     latest = '5.3' # This is just a fallback (latest at time of update)
     # TODO Implementation requires this issue be resolved: https://github.com/ruby-git/ruby-git/issues/424
-    #g = Git.open(path) 
+    #g = Git.open(path)
     #g.brances.remote.each do |branch|
     #end
 
