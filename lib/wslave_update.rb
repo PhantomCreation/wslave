@@ -9,7 +9,7 @@ class WSlaveUpdate
     path = Dir.pwd
     if !File.exist?("#{path}/config/.wslave")
     	puts "!!!This command must be run in a WSlave generated project!!!"
-	return
+	    return
     end
 
     base_path = File.expand_path "#{__dir__}/../base/"
@@ -21,7 +21,7 @@ class WSlaveUpdate
     FileUtils.cp("#{base_path}/Capfile", "#{path}/Capfile")
     # FileUtils.cp("#{base_path}/Gemfile", "#{path}/Gemfile")
     FileUtils.cp("#{base_path}/Rakefile", "#{path}/Rakefile")
-    FileUtils.cp("#{base_path}/Dockerfile", "#{path}/Dockerfile")
+    FileUtils.cp_r("#{base_path}/docker", "#{path}/docker")
     FileUtils.cp("#{base_path}/docker-compose.yml", "#{path}/docker-compose.yml")
     FileUtils.cp("#{base_path}/public/.htaccess", "#{path}/public/.htaccess")
     FileUtils.cp_r(Dir.glob("#{base_path}/config/*"), "#{path}/config")

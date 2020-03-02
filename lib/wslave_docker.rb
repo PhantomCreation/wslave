@@ -22,7 +22,6 @@ class WSlaveDocker
 
   def _check()
     return true if (File.exist?("./config/.wslave") &&
-                    File.exist?("Dockerfile") &&
                     File.exist?("docker-compose.yml"))
     puts "This does not appear to be the root of a WSlave managed app."
     false
