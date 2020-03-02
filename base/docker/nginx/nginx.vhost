@@ -1,13 +1,10 @@
 server {                                                                       
     listen 80;
-    listen [::]:80;
+	listen [::]:80;
 
-    server_name <%= server[:name] %>;
+	server_name testing;
 
-    root <%= server[:root] %>;
-
-    access_log <%= server[:root] %>/access.log;
-    error_log <%= server[:root] %>/error.log;
+    root /var/www/html;
 
     index index.php;
 
@@ -23,7 +20,7 @@ server {
             rewrite ^/index\.php$ /wordpress/index.php last;
             rewrite ^/wp-login\.php$ /hello.php last;
             include snippets/fastcgi-php.conf;
-            fastcgi_pass unix:<%= server[:php_sock_path] %>;
+            fastcgi_pass unix:/run/php/php7.2-fpm.sock;
         }
     }
 
