@@ -1,13 +1,11 @@
-FROM php:7.2.6-apache
+FROM php:7.4-apache
 
 RUN a2enmod rewrite
 RUN service apache2 restart
 RUN apt-get update \
-&& apt-get install -y libpng-dev libjpeg-dev mysql-client mysql-common \
-&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
+&& apt-get install -y libpng-dev libjpeg-dev mariadb-client mariadb-common libonig-dev \
 && docker-php-ext-install gd \
 && docker-php-ext-install mbstring \
-# && docker-php-ext-install mysql \
 && docker-php-ext-install mysqli \
 && docker-php-ext-install pdo \
 && docker-php-ext-install pdo_mysql \

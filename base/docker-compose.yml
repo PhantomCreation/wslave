@@ -2,7 +2,7 @@ version: '3'
 
 services:
   db:
-    image: mysql:5.7
+    image: mariadb:10.5.1-bionic
     volumes:
       - "./db/dev:/db"
       - "./db/active:/docker-entrypoint-initdb.d"
@@ -12,11 +12,22 @@ services:
   web:
     depends_on:
       - db
-    build: .
+    build: ./docker/apache/
     volumes:
       - "./public:/var/www/html"
     ports:
       - "8000:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_PASSWORD: wordpress
+  nweb:
+    depends_on:
+      - db
+    build: ./docker/nginx/
+    volumes:
+      - "./public:/var/www/html"
+    ports:
+      - "8001:80"
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_PASSWORD: wordpress

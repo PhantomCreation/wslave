@@ -4,13 +4,20 @@ require 'fileutils'
 
 class WSlaveCLI < Thor
 
+  def self.exit_on_failure?
+    true
+  end
+
   desc 'new [APP_PATH]', "Generate a new app at APP_PATH"
   long_desc "Creates a new application in the current directory or in the specificed path."
-  method_option :version, default: ''
+  option :version, default: '',
+    desc: 'Specify the version, EG: "--version 5.3". To specify edge/development master use "--version edge".'
+  option :wspath, default: '',
+    desc: 'specify the path to the wslave distribution, EG: "--wspath ../wslave".'
   def new(path = './')
     require_relative '../lib/wslave_new'
     real_path = File.expand_path(path)
-    WSlaveNew.new(real_path, options['version'])
+    WSlaveNew.new(real_path, options['version'], options['wspath'])
   end
 
   desc 'update', "Updates toolchain"
@@ -35,7 +42,7 @@ class WSlaveCLI < Thor
   end
 
   desc 'server', "Starts the development server"
-  method_option :f, default: false, description: 'force close other servers first'
+  method_option :f, type: :boolean, default: false, description: 'force close other servers first'
   def server()
     puts 'Starting server...'
     require_relative '../lib/wslave_docker'
@@ -43,8 +50,8 @@ class WSlaveCLI < Thor
   end
 
   desc 'stop [options]', "Stops the development server"
-  method_option :v, default: false, description: 'remove volume data'
-  method_option :f, default: false, description: 'force close other servers first'
+  method_option :v, type: :boolean, default: false, description: 'remove volume data'
+  method_option :f, type: :boolean, default: false, description: 'force close other servers first'
   def stop()
     puts 'Stopping server...'
     require_relative '../lib/wslave_docker'

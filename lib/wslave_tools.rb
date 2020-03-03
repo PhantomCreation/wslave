@@ -3,7 +3,6 @@ require 'fileutils'
 class WSlaveTools
   def self.wslave_root?()
     return true if (File.exist?("./config/.wslave") &&
-                    File.exist?("Dockerfile") &&
                     File.exist?("docker-compose.yml"))
     puts "This does not appear to be the root of a WSlave managed app."
     puts "Run command again from the root directory of a WSlave app."
