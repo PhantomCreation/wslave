@@ -40,14 +40,14 @@ class WSlaveNew
     `cd #{path} && git init && git add --all && git commit -am "initial commit by wslave"`
 
     `cd #{path} && git submodule add git://github.com/WordPress/WordPress.git public/wordpress`
+    `cd #{path} && git submodule update --init --recursive public/wordpress`
     if (version == 'edge' || version == 'master')
       `cd #{path}/public/wordpress && git checkout master`
     elsif version != ''
-      `cd #{path}/public/wordpress && git checkout #{version}-branch`
+      `cd #{path}/public/wordpress && git checkout #{version}`
     else
       `cd #{path}/public/wordpress && git checkout #{get_stable_branch_version("#{path}/public/wordpress")}-branch`
     end
-    `cd #{path} && git submodule update --init --recursive public/wordpress`
 
     puts "  > Preparing detached content directory"
     FileUtils.cp_r("#{path}/public/wordpress/wp-content", "#{path}/public/wp-content")
