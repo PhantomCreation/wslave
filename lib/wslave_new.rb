@@ -40,14 +40,14 @@ class WSlaveNew
     `cd #{path} && git init && git add --all && git commit -am "initial commit by wslave"`
 
     `cd #{path} && git submodule add git://github.com/WordPress/WordPress.git public/wordpress`
+    `cd #{path} && git submodule update --init --recursive public/wordpress`
     if (version == 'edge' || version == 'master')
       `cd #{path}/public/wordpress && git checkout master`
     elsif version != ''
-      `cd #{path}/public/wordpress && git checkout #{version}-branch`
+      `cd #{path}/public/wordpress && git checkout #{version}`
     else
       `cd #{path}/public/wordpress && git checkout #{get_stable_branch_version("#{path}/public/wordpress")}-branch`
     end
-    `cd #{path} && git submodule update --init --recursive public/wordpress`
 
     puts "  > Preparing detached content directory"
     FileUtils.cp_r("#{path}/public/wordpress/wp-content", "#{path}/public/wp-content")
@@ -71,7 +71,7 @@ class WSlaveNew
   end
 
   def get_stable_branch_version(path)
-    latest = '5.3' # This is just a fallback (latest at time of update)
+    latest = '5.4' # This is just a fallback (latest at time of update)
     # TODO Implementation requires this issue be resolved: https://github.com/ruby-git/ruby-git/issues/424
     #g = Git.open(path)
     #g.brances.remote.each do |branch|
