@@ -71,7 +71,7 @@ class WSlaveNew
   end
 
   def get_stable_branch_version(path)
-    latest = '5.3' # This is just a fallback (latest at time of update)
+    latest = '5.4' # This is just a fallback (latest at time of update)
     # TODO Implementation requires this issue be resolved: https://github.com/ruby-git/ruby-git/issues/424
     #g = Git.open(path)
     #g.brances.remote.each do |branch|
