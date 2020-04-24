@@ -29,4 +29,20 @@ server {
         access_log off;
         log_not_found off;
     }
+
+	location ~- \.(blade\.php)$ {
+		deny all;
+	}
+
+	location ~- composer\.(json|lock)$ {
+		deny all;
+	}
+
+	location ~- package(-lock)?\.json$ {
+		deny all;
+	}
+
+	location ~- yarn\.lock$ {
+		deny all;
+	}
 } 

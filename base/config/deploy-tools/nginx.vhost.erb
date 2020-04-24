@@ -1,35 +1,51 @@
 server {                                                                       
-    listen 80;
-    listen [::]:80;
+  listen 80;
+  listen [::]:80;
 
-    server_name <%= server[:name] %>;
+  server_name <%= server[:name] %>;
 
-    root <%= server[:root] %>;
+  root <%= server[:root] %>;
 
-    access_log <%= server[:root] %>/access.log;
-    error_log <%= server[:root] %>/error.log;
+  access_log <%= server[:root] %>/access.log;
+  error_log <%= server[:root] %>/error.log;
 
-    index index.php;
+  index index.php;
 
-    location / {
-        rewrite ^/(wp-(admin|includes).*) /wordpress/$1 last;
+  location / {
+    rewrite ^/(wp-(admin|includes).*) /wordpress/$1 last;
 
-        rewrite ^/$ /wordpress/index.php last;
+    rewrite ^/$ /wordpress/index.php last;
 
-        location ~ \.php {
-            if ($request_uri !~* "/wp-config.php") {
-                rewrite ^/wp-(.*)\.php$ /wordpress/wp-$1.php last;
-            }
-            rewrite ^/index\.php$ /wordpress/index.php last;
-            rewrite ^/wp-login\.php$ /hello.php last;
-            include snippets/fastcgi-php.conf;
-            fastcgi_pass unix:<%= server[:php_sock_path] %>;
-        }
+    location ~ \.php {
+      if ($request_uri !~* "/wp-config.php") {
+        rewrite ^/wp-(.*)\.php$ /wordpress/wp-$1.php last;
+      }
+      rewrite ^/index\.php$ /wordpress/index.php last;
+      rewrite ^/wp-login\.php$ /hello.php last;
+      include snippets/fastcgi-php.conf;
+      fastcgi_pass unix:<%= server[:php_sock_path] %>;
     }
+  }
 
-    location ~ /\. {
-        deny all;
-        access_log off;
-        log_not_found off;
-    }
+  location ~ /\. {
+    deny all;
+    access_log off;
+    log_not_found off;
+  }
+
+  location ~- \.(blade\.php)$ {
+    deny all;
+  }
+
+  location ~- composer\.(json|lock)$ {
+    deny all;
+  }
+
+  location ~- package(-lock)?\.json$ {
+    deny all;
+  }
+
+  location ~- yarn\.lock$ {
+    deny all;
+  }
 } 
