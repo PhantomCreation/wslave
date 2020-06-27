@@ -28,34 +28,47 @@ class WSlaveCLI < Thor
   end
 
   desc 'sage NAME', "Generate a theme with NAME"
-  long_desc "Generates a theme base with sage in the themes directory with the given" \
+  long_desc "Generates a theme base with sage in the themes directory with the given " \
     "NAME. A random name will be generated if you do not specify a NAME."
   method_option :version, default: ''
   def sage(name = '')
     if name == ''
-      require 'haikunator'
-      name = Haikunator.haikunate(0)
+      
+    else
+      puts "Generating sage theme base for #{name}"
+      require_relative '../lib/wslave_sage'
+      WSlaveSage.create(name, options['version'])
     end
-    puts "Generating sage theme base for #{name}"
-    require_relative '../lib/wslave_sage'
-    WSlaveSage.new(name, options['version'])
   end
 
-  desc 'server', "Starts the development server"
+  desc 'server COMMAND [options]', "Start or stop the development server with 'server start' or 'server stop'"
+  long_desc "Start or stop a development server with 'server start' or 'server stop'. " \
+    "If you do not specify a COMMAND the default is to start a server. If a server is " \
+    "alredy running this command will restart the server."
+  method_option :v, type: :boolean, default: false, description: 'remove volume data'
   method_option :f, type: :boolean, default: false, description: 'force close other servers first'
-  def server()
+  def server(command = 'start')
     puts 'Starting server...'
     require_relative '../lib/wslave_docker'
-    WSlaveDocker.new().server(options['f'])
+    WSlaveDocker.new().server(command.to_sym, options['f'], options['v'])
   end
 
-  desc 'stop [options]', "Stops the development server"
+  desc 'start [options]', "Starts the development server (short for 'server start')"
+  method_option :v, type: :boolean, default: false, description: 'remove volume data'
+  method_option :f, type: :boolean, default: false, description: 'force close other servers first'
+  def start()
+    puts 'Starting server...'
+    require_relative '../lib/wslave_docker'
+    WSlaveDocker.new().server(:start, options['f'], options['v'])
+  end
+
+  desc 'stop [options]', "Stops the development server (short for 'server stop')"
   method_option :v, type: :boolean, default: false, description: 'remove volume data'
   method_option :f, type: :boolean, default: false, description: 'force close other servers first'
   def stop()
     puts 'Stopping server...'
     require_relative '../lib/wslave_docker'
-    WSlaveDocker.new().stop(options['f'], options['v'])
+    WSlaveDocker.new().server(:stop, options['f'], options['v'])
   end
 
   desc 'sync', "Synchronizes submodules and file permissions"
