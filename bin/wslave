@@ -41,10 +41,31 @@ class WSlaveCLI < Thor
     end
   end
 
-  desc 'server COMMAND [options]', "Start or stop the development server with 'server start' or 'server stop'"
-  long_desc "Start or stop a development server with 'server start' or 'server stop'. " \
-    "If you do not specify a COMMAND the default is to start a server. If a server is " \
-    "alredy running this command will restart the server."
+  desc 'server COMMAND [options]', "Control the development server container. " \
+    "Commands include: start stop log console"
+  long_desc <<-LONGDESC
+    Start, stop, view logs for, or connect to a console in a development server container.
+    \x5
+    \x5  COMMANDs:
+    \x5  start    Starts a development server container. *Will restart the container if already running.
+    \x5  stop     Stops a running development container.
+    \x5  log      Connects to the container logs and follows them.
+    \x5  console  Gives a terminal connection to a bash console on the web container.
+    \x5\x5
+    Examples:
+    \x5 Start dev container servers
+    \x5 > wslave server start
+    \x5 Start or restart dev container servers after resetting all volumes (reinit)
+    \x5 > wslave server start -v
+    \x5 Force stop all dev container servers
+    \x5 > wslave server stop -f
+    \x5 Show logs
+    \x5 > wslave server logs
+
+
+    \x5 * If you do not specify a COMMAND the default is to start a server.
+    \x5 * If a server is alredy running this command will restart the server.
+  LONGDESC
   method_option :v, type: :boolean, default: false, description: 'remove volume data'
   method_option :f, type: :boolean, default: false, description: 'force close other servers first'
   def server(command = 'start')

@@ -12,6 +12,13 @@ class WSlaveDocker
       start(force, volume)
     when :stop
       stop(force, volume)
+    when :log
+      log()
+    when :console
+      console()
+    else
+      puts "server subcommand \"#{command.to_s}\" not found."
+      puts "Available commands: start stop log console"
     end
   end
 
@@ -28,6 +35,21 @@ class WSlaveDocker
     return unless _check()
     _force_down() if force
     `docker-compose down#{volume ? ' -v' : ''}`
+  end
+
+  def log()
+    return unless _check()
+    begin
+      system("docker-compose logs -f")
+    rescue Exception => e
+      puts "\n\nEnding log trace. NOTE: Server containers are still running!\n\n"
+      return
+    end
+  end
+
+  def console()
+    return unless _check()
+    system("docker-compose exec web /bin/bash")
   end
 
   def _check()
