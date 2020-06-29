@@ -27,20 +27,6 @@ class WSlaveCLI < Thor
     WSlaveUpdate.new()
   end
 
-  desc 'sage NAME', "Generate a theme with NAME"
-  long_desc "Generates a theme base with sage in the themes directory with the given " \
-    "NAME. A random name will be generated if you do not specify a NAME."
-  method_option :version, default: ''
-  def sage(name = '')
-    if name == ''
-      
-    else
-      puts "Generating sage theme base for #{name}"
-      require_relative '../lib/wslave_sage'
-      WSlaveSage.create(name, options['version'])
-    end
-  end
-
   desc 'server COMMAND [options]', "Control the development server container. " \
     "Commands include: start stop log console"
   long_desc <<-LONGDESC
@@ -104,6 +90,33 @@ class WSlaveCLI < Thor
     require 'rubygems'
     spec = Gem::Specification::load("#{__dir__}/../wslave.gemspec")
     puts spec.version
+  end
+
+  desc 'sage COMMAND', "Generate a theme with NAME"
+  long_desc "Generates a theme base with sage in the themes directory with the given " \
+    "NAME. A random name will be generated if you do not specify a NAME."
+  def sage(command = '', arg = '')
+    case command
+    when 'create'
+      require_relative '../lib/wslave_sage'
+      puts "Generating sage theme base for #{arg}"
+      WSlaveSage.new().create(arg)
+    when 'update'
+      require_relative '../lib/wslave_sage'
+      WSlaveSage.new().update()
+    when 'dev'
+      require_relative '../lib/wslave_sage'
+      WSlaveSage.new().dev()
+    when 'build'
+      require_relative '../lib/wslave_sage'
+      WSlaveSage.new().build()
+    when 'production'
+      require_relative '../lib/wslave_sage'
+      WSlaveSage.new().production()
+    else
+      puts "sage command \"#{command}\" not found."
+      puts "sage commands available: create update dev build production"
+    end
   end
 end
 

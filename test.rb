@@ -10,4 +10,7 @@ puts ">> Starting server..."
 `bundle exec wslave server start`
 
 puts ">> Creating Sage theme named \"test\"..."
-`bundle exec wslave sage test`
+`bundle exec wslave sage create test`
+
+puts ">> Attempting to install theme dependencies and build..."
+`bundle exec wslave sage update`
