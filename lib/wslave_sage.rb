@@ -23,31 +23,31 @@ class WSlaveSage
 
   def update()
     return unless _check()
-    #`cd public/wp-content/themes/#{@theme_name} && npm i -g npm-check-updates && ncu -u && npm audit fix && npm install && yarn && yarn install && yarn build`
-    `cd public/wp-content/themes/#{@theme_name} && yarn && yarn build`
+    system("cd public/wp-content/themes/#{@theme_name} && yarn && yarn build")
   end
 
   def dev()
     return unless _check()
-    `public/wp-content/themes/#{@theme_name} && yarn start`
+    system("cd public/wp-content/themes/#{@theme_name} && yarn start")
   end
 
   def build()
     return unless _check()
-    `public/wp-content/themes/#{@theme_name} && yarn build`
+    system("cd public/wp-content/themes/#{@theme_name} && yarn build")
   end
 
   def production()
     return unless _check()
-    `public/wp-content/themes/#{@theme_name} && yarn build:production`
+    system("cd public/wp-content/themes/#{@theme_name} && yarn build:production")
+  end
+
+  def theme_name?()
+    return '' unless _check()
+    @theme_name
   end
 
   def _write_wslave_sage_config(name)
     File.open("./config/sage.yml", 'w') {|f| YAML.dump({theme: name}, f)}
-  end
-
-  def _read_wslave_sage_config()
-    return unless _check()
   end
 
   def _check()
