@@ -21,7 +21,7 @@ class WSlaveUpdate
     FileUtils.cp("#{base_path}/Capfile", "#{path}/Capfile")
     # FileUtils.cp("#{base_path}/Gemfile", "#{path}/Gemfile")
     FileUtils.cp("#{base_path}/Rakefile", "#{path}/Rakefile")
-    FileUtils.cp_r("#{base_path}/docker", "#{path}/docker")
+    FileUtils.cp_r("#{base_path}/docker", "#{path}/")
     FileUtils.cp("#{base_path}/docker-compose.yml", "#{path}/docker-compose.yml")
     FileUtils.cp("#{base_path}/public/.htaccess", "#{path}/public/.htaccess")
     FileUtils.cp_r(Dir.glob("#{base_path}/config/*"), "#{path}/config")

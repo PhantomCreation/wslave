@@ -9,6 +9,9 @@ deployer:
   fqdn: 
     staging: 
     production: 
+  branch: 
+    staging: master
+    production: master
 app:
   name:
   repo:

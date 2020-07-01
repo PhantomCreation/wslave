@@ -1,5 +1,6 @@
 require 'yaml'
 require 'date'
+require 'wslave_sage'
 
 opts = YAML.load_file('config/definitions.yml')
 db_info = YAML.load_file('config/database.yml')
@@ -12,6 +13,8 @@ site_fqdn = opts['deployer']['fqdn']['production']
 
 disable_rsync = (opts.include?('options') && opts['options'].include?('rsync_enabled') && 
           opts['options']['rsync_enabled'] == false)
+
+set :branch, fetch(opts['deployer']['branch']['production'], 'master')
 
 role :web, "#{deploy_user}@#{host_addr}" 
 
@@ -74,6 +77,36 @@ namespace :deploy do
   task :upload_plugins do
     on roles(:web) do
       upload! './public/wp-content/plugins', "#{deploy_path}/shared/public/wp-content/", recursive: true
+    end
+  end
+
+  desc 'Builds and Syncs the project Sage theme'
+  task :sync_sage_theme do
+    on roles(:web) do
+      wss = WSlaveSage.new()
+      sage_theme_name = wss.theme_name?
+      if (sage_theme_name == '')
+        puts "Couldn't find a Sage theme for this project."
+      else
+        wss.production()
+        `rsync -avzPhu --delete ./public/wp-content/themes/#{sage_theme_name}/vendor #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/vendor`
+        `rsync -avzPhu --delete ./public/wp-content/themes/#{sage_theme_name}/dist #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/dist`
+      end
+    end
+  end
+
+  desc 'Builds and Uploads the project Sage theme'
+  task :upload_sage_theme do
+    on roles(:web) do
+      wss = WSlaveSage.new()
+      sage_theme_name = wss.theme_name?
+      if (sage_theme_name == '')
+        puts "Couldn't find a Sage theme for this project."
+      else
+        wss.production()
+        upload! "./public/wp-content/themes/#{sage_theme_name}/vendor", "#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/", recursive: true
+        upload! "./public/wp-content/themes/#{sage_theme_name}/dist", "#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/", recursive: true
+      end
     end
   end
 
@@ -154,6 +187,11 @@ namespace :deploy do
         invoke('deploy:sync_uploads')
       end
       invoke('deploy')
+      if disable_rsync
+        invoke('deploy:upload_sage_theme')
+      else
+        invoke('deploy:sync_sage_theme')
+      end
       invoke('db:seed')
       invoke('deploy:chikan')
       invoke('deploy:set_permissions')
