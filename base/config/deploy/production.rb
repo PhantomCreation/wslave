@@ -110,6 +110,17 @@ namespace :deploy do
     end
   end
 
+  desc 'Builds and Deploys the project Sage theme'
+  task :sage do
+    on roles(:web) do
+      if disable_rsync
+        invoke('deploy:upload_sage_theme')
+      else
+        invoke('deploy:sync_sage_theme')
+      end
+    end
+  end
+
   desc 'Finds and replaces localhost:8000 and your Staging address with the Production address'
   task :chikan do
     on roles(:web) do
@@ -187,11 +198,7 @@ namespace :deploy do
         invoke('deploy:sync_uploads')
       end
       invoke('deploy')
-      if disable_rsync
-        invoke('deploy:upload_sage_theme')
-      else
-        invoke('deploy:sync_sage_theme')
-      end
+      invoke('sage')
       invoke('db:seed')
       invoke('deploy:chikan')
       invoke('deploy:set_permissions')
