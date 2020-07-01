@@ -223,14 +223,20 @@ cap production -T
 
 Caution
 =======
-1. URL replacement: WordPress doesn't use relative paths and hard-codes URLs in the database 
+1. Even though Capistrano is bening used for deployment, many files such as the wordpress 
+  installation and Sage static build (production) files are not committed. Other files are 
+  generated dynamically. Because of this, some files are deployed that are not/never included 
+  in the git repository, and you should be careful that your repository and local development 
+  files appropriately match. This also, unforunately, can make automated deployments somewhat 
+  complicated.
+2. URL replacement: WordPress doesn't use relative paths and hard-codes URLs in the database 
   (which is a terrible way to manage URLs and should be refactored in WP core...). Because of 
   this we need to replace URL entries depending on where we are running the site. During 
   development this is localhost:8000, so all the Staging and Production URLs get changed to 
   localhost:8000, and then these localhost:8000 entries are converted to production or staging 
   URLs on deployment. If you have an article or something that explicitly used localhost:8000 
   this would end up getting changed to the production or staging URL during deployment.
-2. Sage version: Due to Sage v9 being massively outdated, wslave Sage theme creation currently 
+3. Sage version: Due to Sage v9 being massively outdated, wslave Sage theme creation currently 
   defaults to the upstream dev version (Sage 10 beta). If you would like to use version 9, 
   please create the theme manually with composer and add the "sage.yml" file as described above 
   in the Sage Theme section.
