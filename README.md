@@ -75,7 +75,7 @@ wslave new myblog
 You now have a variety of rake tasks and a pre-configured Capistrano configuration.  
 First, try starting up a local development server:
 ```sh
-wslave server
+wslave server start
 ```
 This will start up a docker container running your site in localhost:8000 (or whatever IP your 
 host was given if you are running with the Docker installation on Windows that 
@@ -85,7 +85,7 @@ uses a separate VM architecture. The IP will be shown toward the top when you st
 If you have stale containers running it's possible you'll have issues, so we made a 
 flag to kill orphaned containers. Just run the server command with -f:
 ```sh
-wslave server -f
+wslave server start -f
 ```
   
 You can edit themes and files in public/wp-content. This folder is mounted within the 
@@ -93,11 +93,11 @@ container, so changes should be immediate as if you were running the server on y
 Edit your themes and plugins as you like, and be sure to use git to manage your sources. 
 When you're done with the dev server type this to shut it down:
 ```sh
-wslave stop
+wslave server stop
 ```
 If you want to clear out all the data saved in the database/cache of the dev container type:
 ```sh
-wslave stop -v
+wslave server stop -v
 ```
 This will reinitialize everything, and you will loose your work if you haven't backed up the 
 container information locally.  
@@ -155,6 +155,59 @@ will show up within the dev container.
 This concludes the short guide. If there's enough interest we'll expand it or perhaps make a 
 detailed video tutorial.
 
+Cloning an Existing Project
+---------------------------
+Since Wordpress has specific versioning and permissions that need to be set, wslave comes with 
+the ```wslave sync``` command to sync project files and set permissions for you. Simply run this 
+command after cloning the repository and running ```bundle install``. Keep in mind you will 
+need a user account that is a member of the 'www-data' account on your local system if you are 
+using a \*nix OS.
+
+Updating
+--------
+wslave will update to the newest version when you run ```bundle update```. Before you update, 
+you should probably make a commit to your git repository. After updating, you can update your 
+files to the latest wslave version by running ```wslave update```
+
+Sage Themes
+-----------
+wslave has integrated Sage theme helpers.
+
+### Existing Sage Themes
+If you have an extisting Sage theme you will need to 
+copy the files into public/wp-content/themes/"theme name" (replacing "theme name" with the actual 
+name of your theme). Then create a config file at ```config/sage.yml``` with the following 
+content:
+```yml
+---
+:theme: "theme name"
+```
+(Again, replacing "theme name" with the name of your theme). 
+
+### New Sage Themes
+You can create a new sage theme with ```wslave sage new theme_name```, repacing theme_name with 
+the name of the theme you wish to create.  
+**CAUTION** When/if asked ```Do you want to remove the existing VCS (.git, .svn..) history?``` 
+answer **n**. Otherwise you will have to re-add all the wslave project files to git. We have no 
+idea why Sage does this...
+
+### Updating/Installing Packages
+You can of course work directly with yarn/composer in your theme directory, or use 
+```wslave sage update```.
+
+### Building Theme Files
+You can of course work directly with yarn/composer in your theme directory, or use 
+```wslave sage build```
+
+### Produciton Build and Deployment
+For static deployment we don't want to commit the vendor and dist directories to SCM, so there's 
+an extra task in Capistrano that's been added to do this for us if you're using the wslave 
+deployment chain. The command to do this would be ```cap staging deploy:sage``` or 
+```cap production deploy:sage``` for staging or production respectively.  
+  
+To do a production build without Capistrano simply use ```wslave sage production``` and assets 
+will be compiled and placed in the appropriate locations in your theme directory.
+
 For more help
 -------------
 Try the following commands:
@@ -170,14 +223,23 @@ cap production -T
 
 Caution
 =======
-1. URL replacement: WordPress doesn't use relative paths and hard-codes URLs in the database 
+1. Even though Capistrano is bening used for deployment, many files such as the wordpress 
+  installation and Sage static build (production) files are not committed. Other files are 
+  generated dynamically. Because of this, some files are deployed that are not/never included 
+  in the git repository, and you should be careful that your repository and local development 
+  files appropriately match. This also, unforunately, can make automated deployments somewhat 
+  complicated.
+2. URL replacement: WordPress doesn't use relative paths and hard-codes URLs in the database 
   (which is a terrible way to manage URLs and should be refactored in WP core...). Because of 
   this we need to replace URL entries depending on where we are running the site. During 
   development this is localhost:8000, so all the Staging and Production URLs get changed to 
   localhost:8000, and then these localhost:8000 entries are converted to production or staging 
   URLs on deployment. If you have an article or something that explicitly used localhost:8000 
   this would end up getting changed to the production or staging URL during deployment.
-
+3. Sage version: Due to Sage v9 being massively outdated, wslave Sage theme creation currently 
+  defaults to the upstream dev version (Sage 10 beta). If you would like to use version 9, 
+  please create the theme manually with composer and add the "sage.yml" file as described above 
+  in the Sage Theme section.
 
 License
 =======

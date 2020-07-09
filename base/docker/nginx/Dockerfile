@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 COPY nginx.vhost /etc/nginx/sites-enabled/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -13,8 +13,6 @@ RUN apt-get clean
 RUN adduser www-data root
 RUN mkdir /db \
 && chmod 777 /db
-
-RUN mkdir /run/php
 
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
