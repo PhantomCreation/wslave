@@ -12,6 +12,7 @@ class WSlaveSage
       puts "This command must be run in the root of a WSlave setup"
     end
 
+    name = 'wslave-sage-theme' if name.empty?
     project_root = Dir.pwd
 
     puts "Creating Sage theme at public/wp-content/themes/#{name}"
@@ -19,6 +20,7 @@ class WSlaveSage
 
     Dir.chdir project_root
     _write_wslave_sage_config(name)
+    _overwrite_sage_webpack_browsersync_config
   end
 
   def update()
@@ -48,6 +50,18 @@ class WSlaveSage
 
   def _write_wslave_sage_config(name)
     File.open("./config/sage.yml", 'w') {|f| YAML.dump({theme: name}, f)}
+  end
+
+  def _overwrite_sage_webpack_browsersync_config
+    return unless _check()
+    theme_info = YAML.load_file("./config/sage.yml")
+    Dir.chdir "#{Dir.pwd}/public/wp-content/themes/#{theme_info[:theme]}"
+
+    webpack_config_path = './webpack.mix.js'
+    new_webpack_config = File.read(webpack_config_path).gsub(
+      /browserSync\('sage.test'\)/, "browserSync('localhost:8000')"
+    )
+    File.open(webpack_config_path, 'w') { |f| f.puts new_webpack_config }
   end
 
   def _check()
