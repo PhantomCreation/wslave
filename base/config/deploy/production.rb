@@ -14,7 +14,9 @@ site_fqdn = opts['deployer']['fqdn']['production']
 disable_rsync = (opts.include?('options') && opts['options'].include?('rsync_enabled') && 
           opts['options']['rsync_enabled'] == false)
 
-set :branch, fetch(opts['deployer']['branch']['production'], 'master')
+if (opts['deployer'].include?('branch') && opts['deployer']['branch'].include?('production'))
+  set :branch, opts['deployer']['branch']['production']
+end
 
 role :web, "#{deploy_user}@#{host_addr}" 
 
@@ -198,9 +200,9 @@ namespace :deploy do
         invoke('deploy:sync_uploads')
       end
       invoke('deploy')
-      invoke('sage')
       invoke('db:seed')
       invoke('deploy:chikan')
+      invoke('deploy:sage')
       invoke('deploy:set_permissions')
     end
   end
