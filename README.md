@@ -1,6 +1,7 @@
 WSlave
 ======
-WSlave, short for "word slave" is a WordPress control tool.
+WSlave, short for "word slave", is a WordPress control tool.  
+*"Word slave" is an archaic term that refers to someone being bound to [a slave to] the words of a contract. Since most WordPress work is usually done under contract the naming seemed doubly-appropriate. The name make no reference to actual slavery, and we have no particular intention of changing the name; but if, even after reading this explanation, you feel the name is inappropriate, then please suggest an alternative and we shall consider changing the name.*
 
 Details
 -------
