@@ -32,6 +32,7 @@ namespace :deploy do
   desc "Generate wp-config.php for profile"
   task :wp_config do
     on roles(:web) do
+      invoke 'deploy:check:make_linked_dirs'
       require_relative '../deploy-tools/gen-wp-config'
       FileUtils.mkdir('./tmp') unless Dir.exist?('./tmp')
       GenerateWPConfig('staging', './tmp')
@@ -90,8 +91,8 @@ namespace :deploy do
         puts "Couldn't find a Sage theme for this project."
       else
         wss.production()
-        `rsync -avzPhu --delete ./public/wp-content/themes/#{sage_theme_name}/vendor #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/vendor`
-        `rsync -avzPhu --delete ./public/wp-content/themes/#{sage_theme_name}/dist #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/dist`
+        `rsync -avzPhu --delete ./public/wp-content/themes/#{sage_theme_name}/vendor/ #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/vendor/`
+        `rsync -avzPhu --delete ./public/wp-content/themes/#{sage_theme_name}/dist/ #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/dist/`
       end
     end
   end
@@ -105,8 +106,8 @@ namespace :deploy do
         puts "Couldn't find a Sage theme for this project."
       else
         wss.production()
-        upload! "./public/wp-content/themes/#{sage_theme_name}/vendor", "#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/", recursive: true
-        upload! "./public/wp-content/themes/#{sage_theme_name}/dist", "#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/", recursive: true
+        upload! "./public/wp-content/themes/#{sage_theme_name}/vendor/", "#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/", recursive: true
+        upload! "./public/wp-content/themes/#{sage_theme_name}/dist/", "#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/", recursive: true
       end
     end
   end
