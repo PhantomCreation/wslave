@@ -57,6 +57,9 @@ class WSlaveNew
     FileUtils.touch("#{path}/public/wp-content/upgrade/.gitkeep")
     Dir.chdir path
 
+    puts "  > Preparing statid data directory"
+    FileUtils.mkdir("#{path}/public/data") unless Dir.exist?("#{path}/public/data")
+
     puts "  > Setting permissions"
     WSlaveTools.set_dev_perms
 
