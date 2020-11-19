@@ -23,6 +23,8 @@ class WSlaveTools
       FileUtils.chmod(0775, "#{path}/public/wp-content/plugins")
       FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/upgrade")
       FileUtils.chmod(0775, "#{path}/public/wp-content/upgrade")
+      FileUtils.chown(nil, 'www-data', "#{path}/public/data")
+      FileUtils.chmod(0775, "#{path}/public/data")
 
       unless Dir.exist?("#{path}/db")
         FileUtils.mkdir("#{path}/db")

@@ -23,7 +23,7 @@ role :web, "#{deploy_user}@#{host_addr}"
 set :tmp_dir, "#{multisite_root}/tmp"
 deploy_path = "#{multisite_root}/#{site_fqdn}"
 
-set :linked_dirs, %w{public/wp-content/uploads public/wordpress public/wp-content/upgrade public/wp-content/plugins tmp}
+set :linked_dirs, %w{public/wp-content/uploads public/wordpress public/wp-content/upgrade public/wp-content/plugins public/data tmp}
 set :linked_files, %w{public/wp-config.php}
 
 set :deploy_to, deploy_path
@@ -79,6 +79,20 @@ namespace :deploy do
   task :upload_plugins do
     on roles(:web) do
       upload! './public/wp-content/plugins', "#{deploy_path}/shared/public/wp-content/", recursive: true
+    end
+  end
+
+  desc 'Syncs the static data directory with rsync'
+  task :sync_static_data do
+    on roles(:web) do
+      `rsync -avzPhu --delete ./public/data/ #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/data/`
+    end
+  end
+
+  desc 'Uploads the static data directory'
+  task :upload_static_data do
+    on roles(:web) do
+      upload! './public/data', "#{deploy_path}/shared/public/data/", recursive: true
     end
   end
 
@@ -194,10 +208,12 @@ namespace :deploy do
         invoke('deploy:upload_wp')
         invoke('deploy:upload_plugins')
         invoke('deploy:upload_uploads')
+        invoke('deploy:upload_static_data')
       else
         invoke('deploy:sync_wp')
         invoke('deploy:sync_plugins')
         invoke('deploy:sync_uploads')
+        invoke('deploy:sync_static_data')
       end
       invoke('deploy')
       invoke('db:seed')
