@@ -32,27 +32,28 @@ Requirements
 *Short list*: ruby, git, docker with docker-compose, \*nix/POSIX compliant terminal/shell.
   
 *Detailed list*
-0. A user who belongs to the 'www-data' group (only required to set write permissions for Docker).
-1. A newer version of ruby and usable ruby gems setup. Ruby packages on some systems may not allow 
+1. A user who belongs to the 'www-data' group (only required to set write permissions for Docker).
+2. A newer version of ruby and usable ruby gems setup. Ruby packages on some systems may not allow 
   gem installation. We generally recommend RVM.
-2. A properly installed Git.
-3. A full Docker installation including docker-compose.
-4. A working and accessable installation of PHP composer.
-5. A POSIX compliant terminal/shell. For example the "Docker Quickstart Terminal" will work fine 
-  in Windows. Pretty much anything will work in Linux or OSX.
+3. A properly installed Git.
+4. A full Docker installation including docker-compose.
+5. A working and accessable installation of PHP composer.
+6. Preferably a POSIX compliant shell with standard tools such as BASH/DASH/ZSH in Linux, OS-X, 
+	or MSYS2 or WSL2 in Windows.
 
 Re: Windows
 -----------
-If you have all of the above set up correctly there should be no issue in getting this to work. 
-On a Linux installation this should only take a few minutes to set up properly, but Windows can 
-be excessively difficult to set up correctly. You basically can't use the standard CMD shell, and 
-power shell seems intent on completely breaking any \*nix style tool you install in very subtle 
-ways if it will run them at all. You'll need to use a POSIX compatible shell with paths set up 
-correctly, such as MSYS2 or the Bash shell that comes with many tools like Git for Windows. 
-You'll need to take special care you have your path set so the Docker commands are accessible to 
-your POSIX compatible shell. You will also need to make sure Docker is initialized and running 
-before you run any wslave server commands; this can usually be done simply by opening the 
-"Docker Quick Start Terminal" if you are running a non-Pro installation of Windows. 
+wslave is not actively maintained on Windows but as of this writing it has been tested and runs 
+under WSL2, and if you have a Pro installation it can be run under MSYS2, CMD with POSIX tools 
+enabled (ls, cd, mkdir, chown, chmod...), and PowerShell. Running under WSL2 is fairly easy, 
+simply install Ruby, Docker, etc. and add your user to the www-data group. 
+Running under MSYS2 requires you install Ruby, PHP, etc. within MSYS2 and set your environment 
+variables properly to allow docker and docker-compose to be run from within MSYS2. 
+Running from CMD or PowerShell require regular Windows Ruby installations and probably some 
+tweaking of your environment.  
+  
+We definitely recommend you use WSL2 under Windows as it maintains the higest compatibility 
+with the lowest ammount of setting and tweaking environment variables.
 
 Installation
 ============
