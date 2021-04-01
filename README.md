@@ -17,7 +17,7 @@ is dynamically generated. Salts are also generated during setup, and stored loca
 unless you have a very specific reason you'll never have to touch any WordPress control file; 
 everything is done for you with the installed tool chain.
   
-Development server functionality is provided by Docker, so you don't need to install a ○amp 
+Development server functionality is provided by Docker, so you don't need to install a ○AMP 
 stack on your machine. Rake tasks are provided for if you want to pull the database and files 
 inserted into the installation [uploaded, attached, etc.] from the control panel within the 
 development VM. Files pulled out of the VM can be set as seeds, and will be seeded to the live 
@@ -80,10 +80,9 @@ First, try starting up a local development server:
 ```sh
 wslave server start
 ```
-This will start up a docker container running your site in localhost:8000 (or whatever IP your 
-host was given if you are running with the Docker installation on Windows that 
-uses a separate VM architecture. The IP will be shown toward the top when you start a 
-"Docker Quickstart Terminal").  
+This will start up 3 docker containers: one running a MariaDB instance, 
+one running an Apache + PHP server instance mapped to [localhost:8000](localhost:8000), 
+and one running an nginx + PHP-FPM instance mapped to [localhost:8001](localhost:8001).  
   
 If you have stale containers running it's possible you'll have issues, so we made a 
 flag to kill orphaned containers. Just run the server command with -f:
@@ -94,7 +93,7 @@ wslave server start -f
 You can edit themes and files in public/wp-content. This folder is mounted within the 
 container, so changes should be immediate as if you were running the server on your host OS. 
 Edit your themes and plugins as you like, and be sure to use git to manage your sources. 
-When you're done with the dev server type this to shut it down:
+When you're done with the dev server, type this to shut it down:
 ```sh
 wslave server stop
 ```
@@ -296,6 +295,10 @@ Caution
   defaults to the upstream dev version (Sage 10 beta). If you would like to use version 9, 
   please create the theme manually with composer and add the "sage.yml" file as described above 
   in the Sage Theme section.
+4. Permissions: When working on themes or extensions you may encounter many permission issues 
+  with files not being read due to them not being owned by the www-data group. You may have to 
+  periodically run ```wslave sync``` or manually chown files (EG: ```chown -R :www-data ./``` 
+  in the directory you are working in).
 
 License
 =======
