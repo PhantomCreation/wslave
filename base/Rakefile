@@ -3,6 +3,11 @@ require 'yaml'
 
 @opts = YAML.load_file('config/definitions.yml')
 
+desc "Print simple instructions."
+task :default do
+  puts 'Please call rake with a taks name, such as "db:dev", or list tasks with "rake -T".'
+end
+
 def rm_dbfile(profile)
   puts "Deleting db/#{profile}/wordpress.sql"
   FileUtils.rm("db/#{profile}/wordpress.sql") if File.exist?("db/#{profile}/wordpress.sql")

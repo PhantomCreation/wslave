@@ -6,12 +6,16 @@ class WSlaveDocker
     puts 'Initializing WSlave Docker Control'
   end
 
-  def server(command = :start, force = false, volume = false)
+  def server(command = :start, force = false)
     case (command)
     when :start
-      start(force, volume)
+      start(force)
     when :stop
-      stop(force, volume)
+      stop(force)
+    when :reset
+      reset(force)
+    when :remove
+      remove(force)
     when :log
       log()
     when :console
@@ -22,19 +26,35 @@ class WSlaveDocker
     end
   end
 
-  def start(force = false, volume = false)
+  def start(force = false)
     return unless _check()
     _force_down() if force
-    `docker-compose down#{volume ? ' -v' : ''}` # Shutdown existing instances
+    `docker-compose stop` # Shutdown existing instances
     _unfuck_dot_htaccess()
     WSlaveTools.set_dev_perms
+    `docker-compose build`
+    `docker-compose start -d`
     `docker-compose up -d`
   end
 
-  def stop(force = false, volume = false)
+  def stop(force = false)
     return unless _check()
     _force_down() if force
-    `docker-compose down#{volume ? ' -v' : ''}`
+    `docker-compose stop`
+  end
+
+  def reset(force = false)
+    return unless _check()
+    _force_down() if force
+    `docker-compose down -v`
+    `docker-compose build`
+    `docker-compose up -d`
+  end
+
+  def remove(force = false)
+    return unless _check()
+    _force_down() if force
+    `docker-compose down -v`
   end
 
   def log()

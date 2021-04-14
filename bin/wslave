@@ -8,6 +8,13 @@ class WSlaveCLI < Thor
     true
   end
 
+  desc 'version', "Prints the version of the installed WSlave"
+  def version()
+    require 'rubygems'
+    spec = Gem::Specification::load("#{__dir__}/../wslave.gemspec")
+    puts spec.version
+  end
+
   desc 'new [APP_PATH]', "Generate a new app at APP_PATH"
   long_desc "Creates a new application in the current directory or in the specificed path."
   option :version, default: '',
@@ -27,57 +34,6 @@ class WSlaveCLI < Thor
     WSlaveUpdate.new()
   end
 
-  desc 'server COMMAND [options]', "Control the development server container. " \
-    "Commands include: start stop log console"
-  long_desc <<-LONGDESC
-    Start, stop, view logs for, or connect to a console in a development server container.
-    \x5
-    \x5  COMMANDs:
-    \x5  start    Starts a development server container. *Will restart the container if already running.
-    \x5  stop     Stops a running development container.
-    \x5  log      Connects to the container logs and follows them.
-    \x5  console  Gives a terminal connection to a bash console on the web container.
-    \x5\x5
-    Examples:
-    \x5 Start dev container servers
-    \x5 > wslave server start
-    \x5 Start or restart dev container servers after resetting all volumes (reinit)
-    \x5 > wslave server start -v
-    \x5 Force stop all dev container servers
-    \x5 > wslave server stop -f
-    \x5 Show logs
-    \x5 > wslave server logs
-
-
-    \x5 * If you do not specify a COMMAND the default is to start a server.
-    \x5 * If a server is alredy running this command will restart the server.
-  LONGDESC
-  method_option :v, type: :boolean, default: false, description: 'remove volume data'
-  method_option :f, type: :boolean, default: false, description: 'force close other servers first'
-  def server(command = 'start')
-    puts 'Starting server...'
-    require_relative '../lib/wslave_docker'
-    WSlaveDocker.new().server(command.to_sym, options['f'], options['v'])
-  end
-
-  desc 'start [options]', "Starts the development server (short for 'server start')"
-  method_option :v, type: :boolean, default: false, description: 'remove volume data'
-  method_option :f, type: :boolean, default: false, description: 'force close other servers first'
-  def start()
-    puts 'Starting server...'
-    require_relative '../lib/wslave_docker'
-    WSlaveDocker.new().server(:start, options['f'], options['v'])
-  end
-
-  desc 'stop [options]', "Stops the development server (short for 'server stop')"
-  method_option :v, type: :boolean, default: false, description: 'remove volume data'
-  method_option :f, type: :boolean, default: false, description: 'force close other servers first'
-  def stop()
-    puts 'Stopping server...'
-    require_relative '../lib/wslave_docker'
-    WSlaveDocker.new().server(:stop, options['f'], options['v'])
-  end
-
   desc 'sync', "Synchronizes submodules and file permissions"
   def sync()
     require_relative '../lib/wslave_tools'
@@ -85,39 +41,76 @@ class WSlaveCLI < Thor
     WSlaveTools.sync()
   end
 
-  desc 'version', "Prints the version of the installed WSlave"
-  def version()
-    require 'rubygems'
-    spec = Gem::Specification::load("#{__dir__}/../wslave.gemspec")
-    puts spec.version
-  end
+  class Server < Thor
+    desc 'start [options]', "Starts the development server"
+    method_option :f, type: :boolean, default: false, description: 'force close other servers first'
+    def start()
+      puts 'Starting server...'
+      require_relative '../lib/wslave_docker'
+      WSlaveDocker.new().server(:start, options['f'])
+    end
 
-  desc 'sage COMMAND', "Generate a theme with NAME"
-  long_desc "Generates a theme base with sage in the themes directory with the given " \
-    "NAME. A random name will be generated if you do not specify a NAME."
-  def sage(command = '', arg = '')
-    case command
-    when 'create'
-      require_relative '../lib/wslave_sage'
-      puts "Generating sage theme base for #{arg}"
-      WSlaveSage.new().create(arg)
-    when 'update'
-      require_relative '../lib/wslave_sage'
-      WSlaveSage.new().update()
-    when 'dev'
-      require_relative '../lib/wslave_sage'
-      WSlaveSage.new().dev()
-    when 'build'
-      require_relative '../lib/wslave_sage'
-      WSlaveSage.new().build()
-    when 'production'
-      require_relative '../lib/wslave_sage'
-      WSlaveSage.new().production()
-    else
-      puts "sage command \"#{command}\" not found."
-      puts "sage commands available: create update dev build production"
+    desc 'stop [options]', "Stops the development server"
+    method_option :f, type: :boolean, default: false, description: 'force close other servers first'
+    def stop()
+      puts 'Stopping server...'
+      require_relative '../lib/wslave_docker'
+      WSlaveDocker.new().server(:stop, options['f'])
+    end
+
+    desc 'reset [options]', "Deletes all container data and volumes, then rebuilds and restarts the containers"
+    method_option :f, type: :boolean, default: false, description: 'force close other servers first'
+    def reset()
+      puts 'Stopping server...'
+      require_relative '../lib/wslave_docker'
+      WSlaveDocker.new().server(:reset, options['f'])
+    end
+
+    desc 'reset [options]', "Shuts down containers and deletes all container data and volumes"
+    method_option :f, type: :boolean, default: false, description: 'force close other servers first'
+    def remove()
+      puts 'Stopping server...'
+      require_relative '../lib/wslave_docker'
+      WSlaveDocker.new().server(:remove, options['f'])
     end
   end
+  desc 'server COMMAND [options]', "Control the development server container"
+  subcommand 'server', Server
+
+  class Sage < Thor
+    desc 'create THEME_NAME', "Creates a theme with the specified name using Sage"
+    def create(theme_name = "wslave_sage_theme")
+      require_relative '../lib/wslave_sage'
+      puts "Generating sage theme base for #{theme_name}"
+      WSlaveSage.new().create(theme_name)
+    end
+
+    desc 'update', "Updates theme generator components"
+    def update
+      require_relative '../lib/wslave_sage'
+      WSlaveSage.new().update()
+    end
+
+    desc 'dev', "Starts a development server which dynamically compiles the theme"
+    def dev
+      require_relative '../lib/wslave_sage'
+      WSlaveSage.new().dev()
+    end
+
+    desc 'build', "Builds the theme (generates development grade static assets)"
+    def build
+      require_relative '../lib/wslave_sage'
+      WSlaveSage.new().build()
+    end
+
+    desc 'production', "Builds the theme (generates production grade static assets)"
+    def production
+      require_relative '../lib/wslave_sage'
+      WSlaveSage.new().production()
+    end
+  end
+  desc 'sage COMMAND', "Generates and manages a Sage theme"
+  subcommand 'sage', Sage
 end
 
 WSlaveCLI.start(ARGV)
