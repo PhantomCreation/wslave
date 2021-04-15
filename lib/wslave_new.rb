@@ -57,7 +57,7 @@ class WSlaveNew
     FileUtils.touch("#{path}/public/wp-content/upgrade/.gitkeep")
     Dir.chdir path
 
-    puts "  > Preparing statid data directory"
+    puts "  > Preparing static data directory"
     FileUtils.mkdir("#{path}/public/data") unless Dir.exist?("#{path}/public/data")
 
     puts "  > Setting permissions"
@@ -74,12 +74,28 @@ class WSlaveNew
   end
 
   def get_stable_branch_version(path)
-    latest = '5.4' # This is just a fallback (latest at time of update)
-    # TODO Implementation requires this issue be resolved: https://github.com/ruby-git/ruby-git/issues/424
-    #g = Git.open(path)
-    #g.brances.remote.each do |branch|
-    #end
+    latest_major = 5
+    latest_minor = 7
 
+    reg = /^(\d*)\.(\d)-branch$/
+    puts "> Checking for WordPress versions in: #{path}"
+    cdir = Dir.pwd()
+    Dir.chdir(path)
+    g = Git.open("./")
+    g.branches.remote.each do |branch|
+      ver = reg.match(branch.name)
+      if (ver) # If the branch matched the x.y-branch pattern
+        if ((ver[1].to_i >= latest_major) && (ver[2].to_i > latest_minor))
+          latest_major = ver[1].to_i
+          latest_minor = ver[2].to_i
+        end
+      end
+
+    end
+    Dir.chdir(cdir)
+
+    latest = "#{latest_major}.#{latest_minor}"
+    puts "> Detected latest WordPress version as: #{latest}"
     latest
   end
 end

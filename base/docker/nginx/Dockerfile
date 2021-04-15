@@ -5,7 +5,10 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN apt-get update
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
-RUN apt-get install -y nginx php-fpm php-mysql \
+# NOTE: When the PHP FPM version changes, you MUST update the 
+#  version named in base/docker/nginx/supervisord.conf and
+#  in base/docker/nginx/nginx.vhost, then rebuild the nweb image!
+RUN apt-get install -y nginx php7.4-fpm php-mysql \
 	libpng-dev libjpeg-dev \
 	mariadb-client mariadb-common \
 	supervisor curl

@@ -1,48 +1,48 @@
 server {                                                                       
-    listen 80;
-	listen [::]:80;
+  listen 80;
+  listen [::]:80;
 
-	server_name testing;
+  server_name testing;
 
-    root /var/www/html;
+  root /var/www/html;
 
-    index index.php;
+  index index.php;
 
-    location / {
-        rewrite ^/(wp-(admin|includes).*) /wordpress/$1 last;
+  location / {
+    rewrite ^/(wp-(admin|includes).*) /wordpress/$1 last;
 
-        rewrite ^/$ /wordpress/index.php last;
+    rewrite ^/$ /wordpress/index.php last;
 
-        location ~ \.php {
-            if ($request_uri !~* "/wp-config.php") {
-                rewrite ^/wp-(.*)\.php$ /wordpress/wp-$1.php last;
-            }
-            rewrite ^/index\.php$ /wordpress/index.php last;
-            rewrite ^/wp-login\.php$ /hello.php last;
-            include snippets/fastcgi-php.conf;
-            fastcgi_pass unix:/run/php/php7.2-fpm.sock;
-        }
+    location ~ \.php {
+      if ($request_uri !~* "/wp-config.php") {
+        rewrite ^/wp-(.*)\.php$ /wordpress/wp-$1.php last;
+      }
+        rewrite ^/index\.php$ /wordpress/index.php last;
+        rewrite ^/wp-login\.php$ /hello.php last;
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php7.4-fpm.sock;
     }
+  }
 
-    location ~ /\. {
-        deny all;
-        access_log off;
-        log_not_found off;
-    }
+  location ~ /\. {
+    deny all;
+    access_log off;
+    log_not_found off;
+  }
 
-	location ~- \.(blade\.php)$ {
+	location ~* \.(blade\.php)$ {
 		deny all;
 	}
 
-	location ~- composer\.(json|lock)$ {
+	location ~* composer\.(json|lock)$ {
 		deny all;
 	}
 
-	location ~- package(-lock)?\.json$ {
+	location ~* package(-lock)?\.json$ {
 		deny all;
 	}
 
-	location ~- yarn\.lock$ {
+	location ~* yarn\.lock$ {
 		deny all;
 	}
 } 

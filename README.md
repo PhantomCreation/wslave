@@ -17,7 +17,7 @@ is dynamically generated. Salts are also generated during setup, and stored loca
 unless you have a very specific reason you'll never have to touch any WordPress control file; 
 everything is done for you with the installed tool chain.
   
-Development server functionality is provided by Docker, so you don't need to install a ○amp 
+Development server functionality is provided by Docker, so you don't need to install a ○AMP 
 stack on your machine. Rake tasks are provided for if you want to pull the database and files 
 inserted into the installation [uploaded, attached, etc.] from the control panel within the 
 development VM. Files pulled out of the VM can be set as seeds, and will be seeded to the live 
@@ -32,27 +32,28 @@ Requirements
 *Short list*: ruby, git, docker with docker-compose, \*nix/POSIX compliant terminal/shell.
   
 *Detailed list*
-0. A user who belongs to the 'www-data' group (only required to set write permissions for Docker).
-1. A newer version of ruby and usable ruby gems setup. Ruby packages on some systems may not allow 
+1. A user who belongs to the 'www-data' group (only required to set write permissions for Docker).
+2. A newer version of ruby and usable ruby gems setup. Ruby packages on some systems may not allow 
   gem installation. We generally recommend RVM.
-2. A properly installed Git.
-3. A full Docker installation including docker-compose.
-4. A working and accessable installation of PHP composer.
-5. A POSIX compliant terminal/shell. For example the "Docker Quickstart Terminal" will work fine 
-  in Windows. Pretty much anything will work in Linux or OSX.
+3. A properly installed Git.
+4. A full Docker installation including docker-compose.
+5. A working and accessable installation of PHP composer.
+6. Preferably a POSIX compliant shell with standard tools such as BASH/DASH/ZSH in Linux, OS-X, 
+	or MSYS2 or WSL2 in Windows.
 
 Re: Windows
 -----------
-If you have all of the above set up correctly there should be no issue in getting this to work. 
-On a Linux installation this should only take a few minutes to set up properly, but Windows can 
-be excessively difficult to set up correctly. You basically can't use the standard CMD shell, and 
-power shell seems intent on completely breaking any \*nix style tool you install in very subtle 
-ways if it will run them at all. You'll need to use a POSIX compatible shell with paths set up 
-correctly, such as MSYS2 or the Bash shell that comes with many tools like Git for Windows. 
-You'll need to take special care you have your path set so the Docker commands are accessible to 
-your POSIX compatible shell. You will also need to make sure Docker is initialized and running 
-before you run any wslave server commands; this can usually be done simply by opening the 
-"Docker Quick Start Terminal" if you are running a non-Pro installation of Windows. 
+wslave is not actively maintained on Windows but as of this writing it has been tested and runs 
+under WSL2, and if you have a Pro installation it can be run under MSYS2, CMD with POSIX tools 
+enabled (ls, cd, mkdir, chown, chmod...), and PowerShell. Running under WSL2 is fairly easy, 
+simply install Ruby, Docker, etc. and add your user to the www-data group. 
+Running under MSYS2 requires you install Ruby, PHP, etc. within MSYS2 and set your environment 
+variables properly to allow docker and docker-compose to be run from within MSYS2. 
+Running from CMD or PowerShell require regular Windows Ruby installations and probably some 
+tweaking of your environment.  
+  
+We definitely recommend you use WSL2 under Windows as it maintains the higest compatibility 
+with the lowest ammount of setting and tweaking environment variables.
 
 Installation
 ============
@@ -79,10 +80,9 @@ First, try starting up a local development server:
 ```sh
 wslave server start
 ```
-This will start up a docker container running your site in localhost:8000 (or whatever IP your 
-host was given if you are running with the Docker installation on Windows that 
-uses a separate VM architecture. The IP will be shown toward the top when you start a 
-"Docker Quickstart Terminal").  
+This will start up 3 docker containers: one running a MariaDB instance, 
+one running an Apache + PHP server instance mapped to [localhost:8000](localhost:8000), 
+and one running an nginx + PHP-FPM instance mapped to [localhost:8001](localhost:8001).  
   
 If you have stale containers running it's possible you'll have issues, so we made a 
 flag to kill orphaned containers. Just run the server command with -f:
@@ -93,7 +93,7 @@ wslave server start -f
 You can edit themes and files in public/wp-content. This folder is mounted within the 
 container, so changes should be immediate as if you were running the server on your host OS. 
 Edit your themes and plugins as you like, and be sure to use git to manage your sources. 
-When you're done with the dev server type this to shut it down:
+When you're done with the dev server, type this to shut it down:
 ```sh
 wslave server stop
 ```
@@ -295,6 +295,10 @@ Caution
   defaults to the upstream dev version (Sage 10 beta). If you would like to use version 9, 
   please create the theme manually with composer and add the "sage.yml" file as described above 
   in the Sage Theme section.
+4. Permissions: When working on themes or extensions you may encounter many permission issues 
+  with files not being read due to them not being owned by the www-data group. You may have to 
+  periodically run ```wslave sync``` or manually chown files (EG: ```chown -R :www-data ./``` 
+  in the directory you are working in).
 
 License
 =======
