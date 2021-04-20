@@ -66,7 +66,7 @@ class WSlaveCLI < Thor
       WSlaveDocker.new().server(:reset, options['f'])
     end
 
-    desc 'reset [options]', "Shuts down containers and deletes all container data and volumes"
+    desc 'remove [options]', "Shuts down containers and deletes all container data and volumes"
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
     def remove()
       puts 'Stopping server...'
