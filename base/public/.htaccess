@@ -1,18 +1,17 @@
 <IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
+	RewriteEngine On
+	RewriteBase /
 
-  RewriteRule ^$ wordpress/index.php [L]
+	RewriteRule ^$ wordpress/index.php [L]
 
-  # Skip real files and directories
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
+	# Skip real files and directories
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
 
-  # Otherwise send it to WordPress
-  RewriteRule .* wordpress/index.php [L]
-
-  # BEGIN WordPress
-  # END WordPress
+	# Otherwise send it to WordPress
+	RewriteRule .* wordpress/index.php [L]
+# BEGIN WordPress
+# END WordPress
 </IfModule>
 <FilesMatch ".+\.(blade\.php)$">
     <IfModule mod_authz_core.c>
@@ -25,3 +24,8 @@
         Deny from all
     </IfModule>
 </FilesMatch>
+php_value upload_max_filesize 4096M
+php_value post_max_size 4096M
+php_value memory_limit 512M
+php_value max_execution_time 1200
+php_value max_input_time 2400

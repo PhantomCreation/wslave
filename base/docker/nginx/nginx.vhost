@@ -45,4 +45,6 @@ server {
 	location ~* yarn\.lock$ {
 		deny all;
 	}
+
+	client_max_body_size 4096M;
 } 
