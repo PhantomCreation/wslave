@@ -1,8 +1,5 @@
 FROM ubuntu:20.04
 
-COPY nginx.vhost /etc/nginx/sites-enabled/default
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 RUN apt-get update && apt-get dist-upgrade -y
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 # NOTE: When the PHP FPM version changes, you MUST update the 
@@ -18,6 +15,10 @@ RUN apt-get clean
 RUN adduser www-data root
 RUN mkdir /db \
 && chmod 777 /db
+
+COPY nginx.vhost /etc/nginx/sites-enabled/default
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY php.ini /etc/php/7.4/fpm/php.ini
 
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
