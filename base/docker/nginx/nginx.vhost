@@ -30,21 +30,25 @@ server {
     log_not_found off;
   }
 
-	location ~* \.(blade\.php)$ {
-		deny all;
-	}
+  location /wp-json/ { # Resolves WP Gutenberg 404 issue
+    try_files $uri $uri/ /index.php;
+  } 
 
-	location ~* composer\.(json|lock)$ {
-		deny all;
-	}
+  location ~* \.(blade\.php)$ {
+    deny all;
+  }
 
-	location ~* package(-lock)?\.json$ {
-		deny all;
-	}
+  location ~* composer\.(json|lock)$ {
+    deny all;
+  }
 
-	location ~* yarn\.lock$ {
-		deny all;
-	}
+  location ~* package(-lock)?\.json$ {
+    deny all;
+  }
 
-	client_max_body_size 4096M;
+  location ~* yarn\.lock$ {
+    deny all;
+  }
+
+  client_max_body_size 4096M;
 } 
