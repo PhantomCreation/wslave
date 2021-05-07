@@ -24,7 +24,9 @@ server {
       rewrite ^/wp-login\.php$ /hello.php last;
       include snippets/fastcgi-php.conf;
       fastcgi_pass unix:<%= server[:php_sock_path] %>;
-    }
+      }
+
+    try_files $uri $uri/ /index.php?$args;
   }
 
   location ~ /\. {

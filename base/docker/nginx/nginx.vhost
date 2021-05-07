@@ -1,8 +1,8 @@
-server {                                                                       
+server {
   listen 80;
   listen [::]:80;
 
-  server_name testing;
+  server_name testing wsalve-nginx;
 
   root /var/www/html;
 
@@ -22,6 +22,8 @@ server {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php7.4-fpm.sock;
     }
+
+    try_files $uri $uri/ /index.php?$args;
   }
 
   location ~ /\. {
