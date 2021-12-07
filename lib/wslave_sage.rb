@@ -20,7 +20,7 @@ class WSlaveSage
 
     Dir.chdir project_root
     _write_wslave_sage_config(name)
-    _overwrite_sage_webpack_browsersync_config
+    # _overwrite_sage_webpack_browsersync_config # TODO: sageの更新でwebpack.mix.jsが出力されなくなっている様子
   end
 
   def update()

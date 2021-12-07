@@ -43,17 +43,26 @@ Requirements
 
 Re: Windows
 -----------
-wslave is not actively maintained on Windows but as of this writing it has been tested and runs 
-under WSL2, and if you have a Pro installation it can be run under MSYS2, CMD with POSIX tools 
-enabled (ls, cd, mkdir, chown, chmod...), and PowerShell. Running under WSL2 is fairly easy, 
-simply install Ruby, Docker, etc. and add your user to the www-data group. 
-Running under MSYS2 requires you install Ruby, PHP, etc. within MSYS2 and set your environment 
-variables properly to allow docker and docker-compose to be run from within MSYS2. 
-Running from CMD or PowerShell require regular Windows Ruby installations and probably some 
-tweaking of your environment.  
+wslave is not actively maintained on Windows, but as of this writing it has been tested and runs 
+in WSL2 on both Pro and non-Pro versions, or for Pro versions in MSYS2, CMD with POSIX tools 
+enabled (ls, cd, mkdir, chown, chmod...), or PowerShell.  
   
-We definitely recommend you use WSL2 under Windows as it maintains the higest compatibility 
-with the lowest ammount of setting and tweaking environment variables.
+Running under WSL2 is generally easier regardless of if you have a Pro version of Windows:
+simply install Ruby, Docker, etc., and add your user to the www-data group (as per the standard 
+Linux setup).  
+  
+Running under MSYS2 requires you install Ruby, PHP, etc. within MSYS2 and set your environment 
+variables properly to allow docker and docker-compose to be run from within MSYS2.  
+  
+Running from CMD or PowerShell requires a regular Windows Ruby installations and probably some 
+tweaking of your environment. This is the most complex setup as it requires a lot of system 
+specific environment settings and there's a variety of issues that can arrise due to CMD and 
+PowerShell not really being properly POSIX compliant / completely compatible with \*nix style 
+tools. 
+  
+All things considered running under WSL2 is recommended as it maintains the higest compatibility 
+with the lowest ammount of setting and tweaking environment variables - and it doesn't require 
+a Pro version of Windows to run the container VMs.
 
 Installation
 ============
@@ -164,6 +173,13 @@ the `wslave sync` command to sync project files and set permissions for you. Sim
 command after cloning the repository and running `bundle install`. Keep in mind you will 
 need a user account that is a member of the 'www-data' account on your local system if you are 
 using a \*nix OS.
+
+!WARNING!
+---------
+Currently there are multiple issues with depenedencies for what is currently the stable version 
+(9) of Sage. Because of this, wslave defaults to using the in-development version. If you need 
+to use Sage 9 we recommend you don't use the wslave shortcuts and helpers for Sage.  
+※This warning will be removed when Sage 10 is officially released.
 
 Updating
 --------
@@ -299,6 +315,35 @@ Caution
   with files not being read due to them not being owned by the www-data group. You may have to 
   periodically run ```wslave sync``` or manually chown files (EG: ```chown -R :www-data ./``` 
   in the directory you are working in).
+
+Known Issues
+============
+There are a few known issues which can't really be fixed by the wslave package. While we can't 
+provide support for any of these (please don't report system specific issues not directly related 
+to wslave) here are some notes on common problems we've dealt with and what solutions we've found.
+
+PHP 8
+-----
+At the time of this update WordPress and most extensions do *not* function properly and you will 
+essentially need to be running a PHP version in the 7 series. The problem being here that on some 
+operating system versions and package managers the default for PHP has already been raised to 8, 
+and as PHP doesn't have language backward-compatibility modes you may need to either supply your 
+build of PHP/PHP-FPM. If you're using a compatible OS we recommend phpenv with php-build. The 
+phpenv repository with install instructions for phpenv and php-build can be found 
+[here](https://github.com/phpenv/phpenv).
+
+gyp
+---
+One of the requirements for a variety of node packages used in Sage theme development and in 
+various other JavaScript/node based tools is gyp [node-gyp], which is notorious for 
+having installation issues which will break a lot of setup scripts and can cause issues. If you 
+encounter an issue during a gyp installation we've found the following commands seem to fix it 
+fairly often (*YMMV):
+```
+npm install --global node-gyp@latest
+npm config set node_gyp $(npm prefix -g)/lib/node_modules/node-gyp/bin/node-gyp.js
+```
+
 
 License
 =======
