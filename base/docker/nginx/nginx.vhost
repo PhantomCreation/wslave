@@ -1,15 +1,24 @@
 server {
-  listen 80;
-  listen [::]:80;
+  listen 8001 default_server;
+  listen [::]:8001;
 
-  server_name testing wsalve-nginx;
+  server_name _;
+
+  port_in_redirect on; # Keeps the 8001 in redirects for better local development
 
   root /var/www/html;
 
   index index.php;
 
+  rewrite ^http://$host/.* http://$host:$server_port$request_uri;
+  rewrite ^http://$host:$server_port/wp-admin$ http://$host:$server_port/wordpress/wp-admin/;
+
+  proxy_set_header Host $host:$server_port;
+
   location / {
-    rewrite ^/(wp-(admin|includes).*) /wordpress/$1 last;
+	  rewrite ^/wp-admin$ /wordpress/wp-admin/ last;
+    rewrite ^/wp-admin/(.*) /wordpress/wp-admin/$1 last;
+    rewrite ^/wp-includes/(.*) /wordpress/wp-includes/$1 last;
 
     rewrite ^/$ /wordpress/index.php last;
 
@@ -18,7 +27,7 @@ server {
         rewrite ^/wp-(.*)\.php$ /wordpress/wp-$1.php last;
       }
         rewrite ^/index\.php$ /wordpress/index.php last;
-        rewrite ^/wp-login\.php$ /hello.php last;
+        #rewrite ^/wp-login\.php$ /hello.php last;
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php7.4-fpm.sock;
     }
@@ -52,5 +61,5 @@ server {
     deny all;
   }
 
-  client_max_body_size 4096M;
-} 
+  client_max_body_size 0;
+}

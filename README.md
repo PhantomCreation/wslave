@@ -279,6 +279,37 @@ As each server and setup are different, and there are many "managed" services fo
 specific restirctions, this process could be very different for you and the above guide should only be 
 considered a generic example.
 
+Notes on Apache
+---------------
+The provided configuration aims to support as many configurations as possible. At the moment .htaccess 
+is provided by the wslave base files and wp-config.php is automatically generated both during the 
+configuration and deployment processes. Currently there is no way to override this, and running wslave 
+update or deploying will end up overwriting these files. Up until now we haven't found any instance of 
+having to override this, but we expect there is need to do so, so please submit an issue with what and 
+how you're trying to modify so we can plan and implement such functionality.  
+  
+### .htaccess
+The .htaccess file provided has directives which do the following:
+ * Silently redirects the site apex to the wordpress index.php file.
+ * [※New] Redirects the wp-admin pages to wordpress/wp-admin. (Newer versions of WP do -not- route 
+  through the main index, so this redirect was required.)
+ * Disallowes direct access to files. ※This is a generally recommended security measure.
+ * Forwards URL paths that do not resolve back to the main index.
+ * Provides anchor points for WP extensions to insert their own directives 
+  (be cautious when re-deploying or updating from wslave).
+ * Disables the file/post upload limits imposed by PHP (file and upload limits are regulated by the 
+  web server).
+
+Notes on nginx
+--------------
+While WordPress is generally run on Apache, the truth is it can be run on nginx with PHP-FPM, and it 
+runs very quickly, cleanly, and securely when configured properly. We've done our best to provide an 
+auto-generated nginx vhost configuration file, but as nginx does't scatter its configuration across 
+multiple local files [such as .htaccess] combined with a main configuration it's very likely you'll 
+need to customize this file - so please consider the provided file only a reference and be sure to 
+review it before using it in a deployed configuration. If you have any recommendations as to how we 
+could improve the nginx configuration file template please submit an issue or a PR!
+
 For more help
 -------------
 Try the following commands:

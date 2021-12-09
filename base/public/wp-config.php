@@ -92,5 +92,10 @@ define('WP_CONTENT_URL', WP_HOME . '/wp-content');
 //define('WP_TEMP_DIR', realpath(ABSPATH . '../../tmp/'));
 define('FS_METHOD', 'direct');
 
+define('FORCE_SSL_ADMIN', false);
+define('FORCE_SSL_LOGIN', false);
+
+define('WP_CACHE', false);
+
 /** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
