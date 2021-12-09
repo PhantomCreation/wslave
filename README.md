@@ -375,6 +375,17 @@ npm install --global node-gyp@latest
 npm config set node_gyp $(npm prefix -g)/lib/node_modules/node-gyp/bin/node-gyp.js
 ```
 
+wp-admin Forwards to HTTPS even on localhost
+--------------------------------------------
+Newer versions of WordPress have embedded forwards to HTTPS for wp-admin and login pages. While 
+you can attempt to diffuse these this doesn't always work, and you may experience a forward to 
+port 443 or to https:// even when you're working on a local wslave development server. We have 
+attempted to prevent this but different browsers and the Apache container at :8000 and the nginx 
+container at :8001 all behave differently and you are likely to encounter this issue. Simply 
+fixing your wp-admin url to something like http://localhost:8001/wordpress/wp-admin after being 
+forwarded should bring you to the admin login page and there should be no issues after that.  
+  
+Suggestions or patches to more cleanly avoid this issue would be much appreciated.
 
 License
 =======
