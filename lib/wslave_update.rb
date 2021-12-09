@@ -24,6 +24,7 @@ class WSlaveUpdate
     FileUtils.cp_r("#{base_path}/docker", "#{path}/")
     FileUtils.cp("#{base_path}/docker-compose.yml", "#{path}/docker-compose.yml")
     FileUtils.cp("#{base_path}/public/.htaccess", "#{path}/public/.htaccess")
+    FileUtils.cp("#{base_path}/public/wp-config.php", "#{path}/public/wp-config.php")
     FileUtils.cp_r(Dir.glob("#{base_path}/config/*"), "#{path}/config")
     FileUtils.cp("#{template_path}/config/database.yml", "#{path}/config/database.yml") unless File.exist?  "#{path}/config/database.yml"
     FileUtils.cp("#{template_path}/config/definitions.yml", "#{path}/config/definitions.yml") unless File.exist?  "#{path}/config/definitions.yml"
