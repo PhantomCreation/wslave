@@ -16,9 +16,10 @@ server {
   proxy_set_header Host $host:$server_port;
 
   location / {
-	  rewrite ^/wp-admin$ /wordpress/wp-admin/ last;
-    rewrite ^/wp-admin/(.*) /wordpress/wp-admin/$1 last;
-    rewrite ^/wp-includes/(.*) /wordpress/wp-includes/$1 last;
+    rewrite ^/wp-admin$ /wordpress/wp-admin/ redirect;
+    rewrite ^/wp-admin/(.*) /wordpress/wp-admin/$1 redirect;
+
+    rewrite ^/wp-includes/(.*) /wordpress/wp-includes/$1;
 
     rewrite ^/$ /wordpress/index.php last;
 
@@ -26,10 +27,10 @@ server {
       if ($request_uri !~* "/wp-config.php") {
         rewrite ^/wp-(.*)\.php$ /wordpress/wp-$1.php last;
       }
-        rewrite ^/index\.php$ /wordpress/index.php last;
-        #rewrite ^/wp-login\.php$ /hello.php last;
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+
+      rewrite ^/index\.php$ /wordpress/index.php last;
+      include snippets/fastcgi-php.conf;
+      fastcgi_pass unix:/run/php/php7.4-fpm.sock;
     }
 
     try_files $uri $uri/ /index.php?$args;
@@ -41,9 +42,13 @@ server {
     log_not_found off;
   }
 
+  location ~* /(?:uploads|files|wp-content\/uploads|wp-content\/files)/.*\.php$ {
+    deny all;
+  }
+
   location /wp-json/ { # Resolves WP Gutenberg 404 issue
     try_files $uri $uri/ /index.php;
-  } 
+  }
 
   location ~* \.(blade\.php)$ {
     deny all;

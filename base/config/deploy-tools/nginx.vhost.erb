@@ -12,8 +12,9 @@ server {
   index index.php;
 
   location / {
-	  rewrite ^/wp-admin$ /wordpress/wp-admin/ last;
-    rewrite ^/wp-admin/(.*) /wordpress/wp-admin/$1 last;
+    rewrite ^/wp-admin$ /wordpress/wp-admin/ redirect;
+    rewrite ^/wp-admin/(.*) /wordpress/wp-admin/$1 redirect;
+
     rewrite ^/wp-includes/(.*) /wordpress/wp-includes/$1 last;
 
     rewrite ^/$ /wordpress/index.php last;
@@ -36,9 +37,14 @@ server {
     log_not_found off;
   }
 
+  # Don't allow PHP to be run from the uploads folder (common attack vector)
+  location ~* /(?:uploads|files|wp-content\/uploads|wp-content\/files)/.*\.php$ {
+    deny all;
+  }
+
   location /wp-json/ { # Resolves WP Gutenberg 404 issue
     try_files $uri $uri/ /index.php;
-  } 
+  }
 
   location ~* \.(blade\.php)$ {
     deny all;
