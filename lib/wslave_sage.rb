@@ -16,7 +16,7 @@ class WSlaveSage
     project_root = Dir.pwd
 
     puts "Creating Sage theme at public/wp-content/themes/#{name}"
-    `cd public/wp-content/themes && composer create-project roots/sage #{name} dev-master`
+    `cd public/wp-content/themes && composer create-project roots/sage #{name} && cd #{name} && composer require roots/acorn`
 
     Dir.chdir project_root
     _write_wslave_sage_config(name)
