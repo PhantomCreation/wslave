@@ -3,7 +3,8 @@ Dir.chdir(__dir__)
 
 puts ">> Attempting to use wslave command to create an installation..."
 #`#{__dir__}/bin/wslave new testing --wspath ../ --version 5.4`
-`#{__dir__}/bin/wslave new testing --wspath ../`
+#`#{__dir__}/bin/wslave new testing --wspath ../`
+`#{__dir__}/bin/wslave new testing --wspath ../ --wppath ./dist/wordpress`
 puts ">> wslave installation created."
 Dir.chdir("#{__dir__}/testing")
 

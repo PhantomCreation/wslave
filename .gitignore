@@ -1,6 +1,7 @@
 *.swp
 *.swo
-tmp/
-testing/
+/tmp
+/testing
+/dist
 *.gem
 Gemfile.lock

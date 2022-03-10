@@ -20,11 +20,18 @@ class WSlaveCLI < Thor
   option :version, default: '',
     desc: 'Specify the version, EG: "--version 5.3". To specify edge/development master use "--version edge".'
   option :wspath, default: '',
-    desc: 'specify the path to the wslave distribution, EG: "--wspath ../wslave".'
+    desc: 'specify the path to the wslave distribution, EG: "--wspath ../wslave".
+      NOTE: This is relative to the new app path.'
+  option :wppath, default: '',
+    desc: 'specify the path to a cloned git wordpress distribution, EG: "--wppath /shared/wordpress".
+      NOTE: This is relative to the new app path.
+      NOTE: If no data is found in this directory, wslave will clone the official WordPress repository here and 
+      copy it. Also, if there is data here that does not match the format of the official WordPress repository, 
+      most wslave functionality will probably be broken.'
   def new(path = './')
     require_relative '../lib/wslave_new'
     real_path = File.expand_path(path)
-    WSlaveNew.new(real_path, options['version'], options['wspath'])
+    WSlaveNew.new(real_path, options['version'], options['wspath'], options['wppath'])
   end
 
   desc 'update', "Updates toolchain"

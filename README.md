@@ -1,7 +1,12 @@
 WSlave
 ======
 WSlave, short for "word slave", is a WordPress control tool.  
-*"Word slave" is an archaic term that refers to someone being bound to [a slave to] the words of a contract. Since most WordPress work is usually done under contract the naming seemed doubly-appropriate. The name make no reference to actual slavery, and we have no particular intention of changing the name; but if, even after reading this explanation, you feel the name is inappropriate, then please suggest an alternative and we shall consider changing the name.*
+  
+*"Word Slave" is an archaic term that refers to someone being bound to [a slave to] the words of 
+a contract. Since most WordPress work is usually done under contract the naming seemed 
+doubly-appropriate. The name make no reference to actual slavery, and we have no particular 
+intention of changing the name; but if, even after reading this explanation, you feel the name 
+is inappropriate, then please suggest an alternative and we may consider changing the name.*
 
 Details
 -------
@@ -83,7 +88,23 @@ or create a new project with a name:
 ```sh
 wslave new myblog
 ```
-
+If you are going to be developing wslave, you can specify the path of your local wslave 
+and this will be automatically set in the Gemfile of the generated project (*NOTE: 
+this path is relative to the project, not where you are running the command*):
+```sh
+wslave new myblog --wspath ../wslave
+```
+If you are generating multiple projects, you can save on time and bandwidth by specifying 
+the location of an already cloned WordPress distribution, which will copy from that location 
+instead of doing a full clone from GitHub:
+```sh
+wslave new myblog --wppath /shared/wordpress
+```
+If you want to specify a specific verison of WordPress to use, you can do so like this:
+```sh
+wslave new myblog --version 5.2
+```
+  
 You now have a variety of rake tasks and a pre-configured Capistrano configuration.  
 First, try starting up a local development server:
 ```sh
