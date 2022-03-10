@@ -44,8 +44,9 @@ class WSlaveNew
       puts "  >> Checking wppath (#{wppath}) ..."
       if (File.directory? wppath)
         puts "  >> wppath is a folder. Copying..."
+        Dir.chdir path
         FileUtils.cp_r wppath, "public/wordpress"
-        `cd public/wordpress`
+        Dir.chdir "public/wordpress"
         `git clean -fdx; git stash`
         `git checkout master`
         `git pull`
