@@ -1,7 +1,12 @@
 WSlave
 ======
 WSlave, short for "word slave", is a WordPress control tool.  
-*"Word slave" is an archaic term that refers to someone being bound to [a slave to] the words of a contract. Since most WordPress work is usually done under contract the naming seemed doubly-appropriate. The name make no reference to actual slavery, and we have no particular intention of changing the name; but if, even after reading this explanation, you feel the name is inappropriate, then please suggest an alternative and we shall consider changing the name.*
+  
+*"Word Slave" is an archaic term that refers to someone being bound to [a slave to] the words of 
+a contract. Since most WordPress work is usually done under contract the naming seemed 
+doubly-appropriate. The name make no reference to actual slavery, and we have no particular 
+intention of changing the name; but if, even after reading this explanation, you feel the name 
+is inappropriate, then please suggest an alternative and we may consider changing the name.*
 
 Details
 -------
@@ -43,17 +48,26 @@ Requirements
 
 Re: Windows
 -----------
-wslave is not actively maintained on Windows but as of this writing it has been tested and runs 
-under WSL2, and if you have a Pro installation it can be run under MSYS2, CMD with POSIX tools 
-enabled (ls, cd, mkdir, chown, chmod...), and PowerShell. Running under WSL2 is fairly easy, 
-simply install Ruby, Docker, etc. and add your user to the www-data group. 
-Running under MSYS2 requires you install Ruby, PHP, etc. within MSYS2 and set your environment 
-variables properly to allow docker and docker-compose to be run from within MSYS2. 
-Running from CMD or PowerShell require regular Windows Ruby installations and probably some 
-tweaking of your environment.  
+wslave is not actively maintained on Windows, but as of this writing it has been tested and runs 
+in WSL2 on both Pro and non-Pro versions, or for Pro versions in MSYS2, CMD with POSIX tools 
+enabled (ls, cd, mkdir, chown, chmod...), or PowerShell.  
   
-We definitely recommend you use WSL2 under Windows as it maintains the higest compatibility 
-with the lowest ammount of setting and tweaking environment variables.
+Running under WSL2 is generally easier regardless of if you have a Pro version of Windows:
+simply install Ruby, Docker, etc., and add your user to the www-data group (as per the standard 
+Linux setup).  
+  
+Running under MSYS2 requires you install Ruby, PHP, etc. within MSYS2 and set your environment 
+variables properly to allow docker and docker-compose to be run from within MSYS2.  
+  
+Running from CMD or PowerShell requires a regular Windows Ruby installations and probably some 
+tweaking of your environment. This is the most complex setup as it requires a lot of system 
+specific environment settings and there's a variety of issues that can arrise due to CMD and 
+PowerShell not really being properly POSIX compliant / completely compatible with \*nix style 
+tools. 
+  
+All things considered running under WSL2 is recommended as it maintains the higest compatibility 
+with the lowest ammount of setting and tweaking environment variables - and it doesn't require 
+a Pro version of Windows to run the container VMs.
 
 Installation
 ============
@@ -74,7 +88,23 @@ or create a new project with a name:
 ```sh
 wslave new myblog
 ```
-
+If you are going to be developing wslave, you can specify the path of your local wslave 
+and this will be automatically set in the Gemfile of the generated project (*NOTE: 
+this path is relative to the project, not where you are running the command*):
+```sh
+wslave new myblog --wspath ../wslave
+```
+If you are generating multiple projects, you can save on time and bandwidth by specifying 
+the location of an already cloned WordPress distribution, which will copy from that location 
+instead of doing a full clone from GitHub:
+```sh
+wslave new myblog --wppath /shared/wordpress
+```
+If you want to specify a specific verison of WordPress to use, you can do so like this:
+```sh
+wslave new myblog --version 5.2
+```
+  
 You now have a variety of rake tasks and a pre-configured Capistrano configuration.  
 First, try starting up a local development server:
 ```sh
@@ -164,6 +194,13 @@ the `wslave sync` command to sync project files and set permissions for you. Sim
 command after cloning the repository and running `bundle install`. Keep in mind you will 
 need a user account that is a member of the 'www-data' account on your local system if you are 
 using a \*nix OS.
+
+!WARNING!
+---------
+Currently there are multiple issues with depenedencies for what is currently the stable version 
+(9) of Sage. Because of this, wslave defaults to using the in-development version. If you need 
+to use Sage 9 we recommend you don't use the wslave shortcuts and helpers for Sage.  
+※This warning will be removed when Sage 10 is officially released.
 
 Updating
 --------
@@ -263,6 +300,37 @@ As each server and setup are different, and there are many "managed" services fo
 specific restirctions, this process could be very different for you and the above guide should only be 
 considered a generic example.
 
+Notes on Apache
+---------------
+The provided configuration aims to support as many configurations as possible. At the moment .htaccess 
+is provided by the wslave base files and wp-config.php is automatically generated both during the 
+configuration and deployment processes. Currently there is no way to override this, and running wslave 
+update or deploying will end up overwriting these files. Up until now we haven't found any instance of 
+having to override this, but we expect there is need to do so, so please submit an issue with what and 
+how you're trying to modify so we can plan and implement such functionality.  
+  
+### .htaccess
+The .htaccess file provided has directives which do the following:
+ * Silently redirects the site apex to the wordpress index.php file.
+ * [※New] Redirects the wp-admin pages to wordpress/wp-admin. (Newer versions of WP do -not- route 
+  through the main index, so this redirect was required.)
+ * Disallowes direct access to files. ※This is a generally recommended security measure.
+ * Forwards URL paths that do not resolve back to the main index.
+ * Provides anchor points for WP extensions to insert their own directives 
+  (be cautious when re-deploying or updating from wslave).
+ * Disables the file/post upload limits imposed by PHP (file and upload limits are regulated by the 
+  web server).
+
+Notes on nginx
+--------------
+While WordPress is generally run on Apache, the truth is it can be run on nginx with PHP-FPM, and it 
+runs very quickly, cleanly, and securely when configured properly. We've done our best to provide an 
+auto-generated nginx vhost configuration file, but as nginx does't scatter its configuration across 
+multiple local files [such as .htaccess] combined with a main configuration it's very likely you'll 
+need to customize this file - so please consider the provided file only a reference and be sure to 
+review it before using it in a deployed configuration. If you have any recommendations as to how we 
+could improve the nginx configuration file template please submit an issue or a PR!
+
 For more help
 -------------
 Try the following commands:
@@ -299,6 +367,46 @@ Caution
   with files not being read due to them not being owned by the www-data group. You may have to 
   periodically run ```wslave sync``` or manually chown files (EG: ```chown -R :www-data ./``` 
   in the directory you are working in).
+
+Known Issues
+============
+There are a few known issues which can't really be fixed by the wslave package. While we can't 
+provide support for any of these (please don't report system specific issues not directly related 
+to wslave) here are some notes on common problems we've dealt with and what solutions we've found.
+
+PHP 8
+-----
+At the time of this update WordPress and most extensions do *not* function properly and you will 
+essentially need to be running a PHP version in the 7 series. The problem being here that on some 
+operating system versions and package managers the default for PHP has already been raised to 8, 
+and as PHP doesn't have language backward-compatibility modes you may need to either supply your 
+build of PHP/PHP-FPM. If you're using a compatible OS we recommend phpenv with php-build. The 
+phpenv repository with install instructions for phpenv and php-build can be found 
+[here](https://github.com/phpenv/phpenv).
+
+gyp
+---
+One of the requirements for a variety of node packages used in Sage theme development and in 
+various other JavaScript/node based tools is gyp [node-gyp], which is notorious for 
+having installation issues which will break a lot of setup scripts and can cause issues. If you 
+encounter an issue during a gyp installation we've found the following commands seem to fix it 
+fairly often (*YMMV):
+```
+npm install --global node-gyp@latest
+npm config set node_gyp $(npm prefix -g)/lib/node_modules/node-gyp/bin/node-gyp.js
+```
+
+wp-admin Forwards to HTTPS even on localhost
+--------------------------------------------
+Newer versions of WordPress have embedded forwards to HTTPS for wp-admin and login pages. While 
+you can attempt to diffuse these this doesn't always work, and you may experience a forward to 
+port 443 or to https:// even when you're working on a local wslave development server. We have 
+attempted to prevent this but different browsers and the Apache container at :8000 and the nginx 
+container at :8001 all behave differently and you are likely to encounter this issue. Simply 
+fixing your wp-admin url to something like http://localhost:8001/wordpress/wp-admin after being 
+forwarded should bring you to the admin login page and there should be no issues after that.  
+  
+Suggestions or patches to more cleanly avoid this issue would be much appreciated.
 
 License
 =======

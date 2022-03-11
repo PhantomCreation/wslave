@@ -11,20 +11,28 @@ class WSlaveTools
 
   def self.set_dev_perms(path = '.')
     begin
+      unless Dir.exist?("#{path}/public/data")
+        FileUtils.mkdir("#{path}/public/data")
+        FileUtils.touch("#{path}/public/data/.gitkeep")
+      end
+      FileUtils.chown(nil, 'www-data', "#{path}/public/data")
+      FileUtils.chmod(0775, "#{path}/public/data")
+
+      FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/themes")
+      FileUtils.chmod(0775, "#{path}/public/wp-content/themes")
+
+      FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/uploads")
+      FileUtils.chmod(0775, "#{path}/public/wp-content/uploads")
+
+      FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/plugins")
+      FileUtils.chmod(0775, "#{path}/public/wp-content/plugins")
+      
       unless Dir.exist?("#{path}/public/wp-content/upgrade")
         FileUtils.mkdir("#{path}/public/wp-content/upgrade")
         FileUtils.touch("#{path}/public/wp-content/upgrade/.gitkeep")
       end
-      FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/themes")
-      FileUtils.chmod(0775, "#{path}/public/wp-content/themes")
-      FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/uploads")
-      FileUtils.chmod(0775, "#{path}/public/wp-content/uploads")
-      FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/plugins")
-      FileUtils.chmod(0775, "#{path}/public/wp-content/plugins")
       FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/upgrade")
       FileUtils.chmod(0775, "#{path}/public/wp-content/upgrade")
-      FileUtils.chown(nil, 'www-data', "#{path}/public/data")
-      FileUtils.chmod(0775, "#{path}/public/data")
 
       unless Dir.exist?("#{path}/db")
         FileUtils.mkdir("#{path}/db")
@@ -59,6 +67,7 @@ class WSlaveTools
       end
       FileUtils.chown(nil, 'www-data', "#{path}/db/production")
       FileUtils.chmod(0775, "#{path}/db/production")
+
     rescue Errno::EPERM
       puts "!!!WARNING!!! Your user does not belong to the www-data group!\n" \
         " >>> Unable to make folders writable for devlopment. <<<\n" \

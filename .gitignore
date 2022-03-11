@@ -1,6 +1,7 @@
 *.swp
 *.swo
-tmp/
-testing/
+/tmp
+/testing
+/dist/wordpress
 *.gem
 Gemfile.lock

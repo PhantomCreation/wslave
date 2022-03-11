@@ -6,7 +6,7 @@ require 'git'
 require_relative 'wslave_tools'
 
 class WSlaveNew
-  def initialize(path, version = '', wspath = '')
+  def initialize(path, version = '', wspath = '', wppath = '')
     puts '⚙ Initializing Toolchain・・・'
 
     if (wspath != '')
@@ -38,6 +38,20 @@ class WSlaveNew
     File.open("#{path}/config/.wslave", 'w') {|f| f.write(spec.version)}
 
     `cd #{path} && git init && git add --all && git commit -am "initial commit by wslave"`
+
+    if (wppath != '')
+      wppath = File.expand_path(wppath)
+      puts "  >> Checking wppath (#{wppath}) ..."
+      if (File.directory? wppath)
+        puts "  >> wppath is a folder. Copying..."
+        Dir.chdir path
+        FileUtils.cp_r wppath, "public/wordpress"
+        Dir.chdir "public/wordpress"
+        `git clean -fdx; git stash`
+        `git checkout master`
+        `git pull`
+      end
+    end
 
     `cd #{path} && git submodule add git://github.com/WordPress/WordPress.git public/wordpress`
     `cd #{path} && git submodule update --init --recursive public/wordpress`

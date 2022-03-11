@@ -16,11 +16,14 @@ class WSlaveSage
     project_root = Dir.pwd
 
     puts "Creating Sage theme at public/wp-content/themes/#{name}"
-    `cd public/wp-content/themes && composer create-project roots/sage #{name} dev-master`
+    Dir.chdir "public/wp-content/themes"
+    `composer create-project roots/sage #{name}`
+    Dir.chdir name
+    `composer require roots/acorn`
 
     Dir.chdir project_root
     _write_wslave_sage_config(name)
-    _overwrite_sage_webpack_browsersync_config
+    # _overwrite_sage_webpack_browsersync_config # TODO: sageの更新でwebpack.mix.jsが出力されなくなっている様子
   end
 
   def update()

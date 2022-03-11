@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'wslave'
-  s.version     = '0.3.4'
+  s.version     = '0.3.5'
   s.licenses     = ['GPL-3.0', 'AGPL-3.0']
   s.summary     = '"Word Slave" generates and controls a WordPress installation'
   s.description = 'Word Slave includes the wslave command and a control library to generate a ' \
@@ -25,8 +25,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'capistrano-scm-copy', '~> 0.7', '0.7.0'
   s.add_dependency 'capistrano-file-permissions', '~> 1.0', '1.0.0'
 
-  s.add_dependency 'git', '~> 1.8', '1.8.1'
+  s.add_dependency 'git', '~> 1.10', '1.10.2'
 
-  s.add_dependency 'thor', '~> 1.1', '1.1.0'
+  s.add_dependency 'thor', '~> 1.2', '1.2.1'
   s.add_dependency 'haikunator', '~> 1.1', '1.1.1'
 end

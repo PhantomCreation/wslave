@@ -1,15 +1,25 @@
 server {
-  listen 80;
-  listen [::]:80;
+  listen 8001 default_server;
+  listen [::]:8001;
 
-  server_name testing wsalve-nginx;
+  server_name _;
+
+  port_in_redirect on; # Keeps the 8001 in redirects for better local development
 
   root /var/www/html;
 
   index index.php;
 
+  rewrite ^http://$host/.* http://$host:$server_port$request_uri;
+  rewrite ^http://$host:$server_port/wp-admin$ http://$host:$server_port/wordpress/wp-admin/;
+
+  proxy_set_header Host $host:$server_port;
+
   location / {
-    rewrite ^/(wp-(admin|includes).*) /wordpress/$1 last;
+    rewrite ^/wp-admin$ /wordpress/wp-admin/ redirect;
+    rewrite ^/wp-admin/(.*) /wordpress/wp-admin/$1 redirect;
+
+    rewrite ^/wp-includes/(.*) /wordpress/wp-includes/$1;
 
     rewrite ^/$ /wordpress/index.php last;
 
@@ -17,10 +27,10 @@ server {
       if ($request_uri !~* "/wp-config.php") {
         rewrite ^/wp-(.*)\.php$ /wordpress/wp-$1.php last;
       }
-        rewrite ^/index\.php$ /wordpress/index.php last;
-        rewrite ^/wp-login\.php$ /hello.php last;
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+
+      rewrite ^/index\.php$ /wordpress/index.php last;
+      include snippets/fastcgi-php.conf;
+      fastcgi_pass unix:/run/php/php7.4-fpm.sock;
     }
 
     try_files $uri $uri/ /index.php?$args;
@@ -32,9 +42,13 @@ server {
     log_not_found off;
   }
 
+  location ~* /(?:uploads|files|wp-content\/uploads|wp-content\/files)/.*\.php$ {
+    deny all;
+  }
+
   location /wp-json/ { # Resolves WP Gutenberg 404 issue
     try_files $uri $uri/ /index.php;
-  } 
+  }
 
   location ~* \.(blade\.php)$ {
     deny all;
@@ -52,5 +66,5 @@ server {
     deny all;
   }
 
-  client_max_body_size 4096M;
-} 
+  client_max_body_size 0;
+}
