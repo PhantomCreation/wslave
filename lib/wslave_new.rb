@@ -53,7 +53,7 @@ class WSlaveNew
       end
     end
 
-    `cd #{path} && git submodule add git://github.com/WordPress/WordPress.git public/wordpress`
+    `cd #{path} && git submodule add https://github.com/WordPress/WordPress.git public/wordpress`
     `cd #{path} && git submodule update --init --recursive public/wordpress`
     if (version == 'edge' || version == 'master')
       `cd #{path}/public/wordpress && git checkout master`

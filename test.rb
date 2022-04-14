@@ -6,7 +6,7 @@ wppath = File.expand_path("#{__dir__}/dist/wordpress")
 if (!(File.directory? wppath))
   puts ">> wordpress not found, pre-cloning.\n" +
     "NOTE: After testing, you can remove the dist/wordpress directory."
-  `git clone git://github.com/WordPress/WordPress.git #{wppath}`
+  `git clone https://github.com/WordPress/WordPress.git #{wppath}`
 else
   puts ">> wordpress directory found, skipping clone."
 end

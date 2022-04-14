@@ -1,5 +1,5 @@
 # config valid only for current version of Capistrano
-lock "3.16.0"
+lock "3.17.0"
 
 require 'yaml'
 opts = YAML.load_file('config/definitions.yml')
