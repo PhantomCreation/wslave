@@ -2,8 +2,8 @@ require 'yaml'
 require 'date'
 require 'wslave_sage'
 
-opts = YAML.load_file('config/definitions.yml')
-db_info = YAML.load_file('config/database.yml')
+opts = YAML.load_file('config/definitions.yml', aliases: true)
+db_info = YAML.load_file('config/database.yml', aliases: true)
 
 deploy_user = opts['deployer']['user']
 deploy_group = opts['deployer']['www_data_group']
