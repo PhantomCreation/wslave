@@ -197,6 +197,16 @@ namespace :deploy do
     end
   end
 
+  desc 'Creates an additional symlink at the path specified in definitions.yml to current/public'
+  task :set_symlink do
+    on roles(:web) do
+      puts 'Setting symlink'
+      if (opts['deployer'].include?('symlink') && opts['deployer']['symlink'].include?('staging'))
+        execute "ln -s #{deploy_path}/current/public #{opts['deployer']['root']}/#{opts['deployer']['symlink']['staging']}"
+      end
+    end
+  end
+
   desc 'Perform special seed tasks required on intial seed'
   task :initial do
     on roles(:web) do
@@ -220,6 +230,7 @@ namespace :deploy do
       invoke('deploy:chikan')
       invoke('deploy:sage')
       invoke('deploy:set_permissions')
+      invoke('deploy:set_symlink')
     end
   end
 
