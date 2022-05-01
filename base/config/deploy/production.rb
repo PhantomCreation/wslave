@@ -159,9 +159,9 @@ namespace :deploy do
       # replace instances of it with something that won't match
       db_data = db_data.gsub(/#{opts['deployer']['fqdn']['production']}/, anchor)
 
-      # Set staging URL's to the anchor
-      if opts['deployer']['fqdn']['staging'] != ''
-        db_data = db_data.gsub(/#{opts['deployer']['fqdn']['staging']}/, anchor)
+      # Set production URL's to the anchor
+      if opts['deployer']['fqdn']['production'] != ''
+        db_data = db_data.gsub(/#{opts['deployer']['fqdn']['production']}/, anchor)
       end
 
       # Set localhost entries to the anchor
@@ -197,6 +197,16 @@ namespace :deploy do
     end
   end
 
+  desc 'Creates an additional symlink at the path specified in definitions.yml to current/public'
+  task :set_symlink do
+    on roles(:web) do
+      puts 'Setting symlink'
+      if (opts['deployer'].include?('symlink') && opts['deployer']['symlink'].include?('production'))
+        execute "ln -s #{deploy_path}/current/public #{opts['deployer']['root']}/#{opts['deployer']['symlink']['production']}"
+      end
+    end
+  end
+
   desc 'Perform special seed tasks required on intial seed'
   task :initial do
     on roles(:web) do
@@ -220,6 +230,7 @@ namespace :deploy do
       invoke('deploy:chikan')
       invoke('deploy:sage')
       invoke('deploy:set_permissions')
+      invoke('deploy:set_symlink')
     end
   end
 

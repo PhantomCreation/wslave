@@ -12,6 +12,10 @@ deployer:
   branch: 
     staging: master
     production: master
+  # Uncomment this to create a symlink to the deploy root's current/public at the specified location relative to the deploy root
+  # symlink:
+    # staging:
+    # production:
 app:
   name:
   repo:

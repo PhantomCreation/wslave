@@ -1,24 +1,22 @@
-<IfModule mod_rewrite.c>
-	RewriteEngine On
-	RewriteBase /
+RewriteEngine On
+RewriteBase /
 
-  # Open the subfoldered index when accessing the apex
-	RewriteRule ^$ wordpress/index.php [L]
+# Open the subfoldered index when accessing the apex
+RewriteRule ^$ wordpress/index.php [L]
 
-  # Special forwarding to wp-admin
-  RewriteRule ^wp-admin$ wp-admin/
-  RewriteRule ^wp-admin/(.*) wordpress/wp-admin/$1 [R=301,L]
+# Special forwarding to wp-admin
+RewriteRule ^wp-admin$ wp-admin/
+RewriteRule ^wp-admin/(.*) wordpress/wp-admin/$1 [R=301,L]
 
-	# Skip real files and directories
-	RewriteCond %{REQUEST_FILENAME} !-f
-	RewriteCond %{REQUEST_FILENAME} !-d
+# Skip real files and directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 
-	# Otherwise send it to WordPress
-	RewriteRule .* wordpress/index.php [L]
+# Otherwise send it to WordPress
+RewriteRule .* wordpress/index.php [L]
 
 # BEGIN WordPress
 # END WordPress
-</IfModule>
 
 <FilesMatch ".+\.(blade\.php)$">
     <IfModule mod_authz_core.c>
@@ -31,6 +29,3 @@
         Deny from all
     </IfModule>
 </FilesMatch>
-
-php_value upload_max_filesize 0
-php_value post_max_size 0
