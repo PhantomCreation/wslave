@@ -43,7 +43,7 @@ class WSlaveSage
 
   def production()
     return unless _check()
-    system("cd public/wp-content/themes/#{@theme_name} && yarn build:production")
+    system("cd public/wp-content/themes/#{@theme_name} && yarn build")
   end
 
   def theme_name?()
