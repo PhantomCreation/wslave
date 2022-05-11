@@ -1,0 +1,9 @@
+# Set user to www-data to try and avoid root owned files being created
+user: www-data
+path: /var/www/html/wordpress
+# Core is managed seperately by git, so disable core file commands
+disabled_commands:
+  - core download
+  - core install
+  - core update
+  - config create
