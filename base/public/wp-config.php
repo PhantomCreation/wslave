@@ -7,7 +7,11 @@ define('DB_USER', 'root');
 /** MySQL database password */
 define('DB_PASSWORD', 'wordpress');
 /** MySQL hostname */
-define('DB_HOST', 'db');
+if (php_sapi_name() == "cli") {
+	define('DB_HOST', '127.0.0.1:8003');
+} else {
+	define('DB_HOST', 'db');
+}
 /** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8');
 /** The Database Collate type. Don't change this if in doubt. */
@@ -53,7 +57,11 @@ define('WP_DEBUG', false);
 if (!defined('ABSPATH'))
   define('ABSPATH', dirname(__FILE__) . '/wordpress');
 
-define('WP_HOME', 'http://' . $_SERVER['HTTP_HOST']);
+if (php_sapi_name() == "cli") {
+	define('WP_HOME', 'http://localhost:8001');
+} else {
+	define('WP_HOME', 'http://' . $_SERVER['HTTP_HOST']);
+}
 define('WP_SITEURL', WP_HOME . '/wordpress');
 define('WP_CONTENT_DIR', realpath(ABSPATH . '../wp-content'));
 define('WP_CONTENT_URL', WP_HOME . '/wp-content');
