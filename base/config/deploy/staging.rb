@@ -137,10 +137,10 @@ namespace :deploy do
     end
   end
 
-  desc 'Finds and replaces localhost:8000 and your Production address with the Staging address'
+  desc 'Finds and replaces localhost:8000 / localhost:8001 and your Production address with the Staging address'
   task :chikan do
     on roles(:web) do
-      puts 'Replacing localhost:8000 and Production URLs with Staging URLs...'
+      puts 'Replacing localhost:8000 / localhost:8001 and Production URLs with Staging URLs...'
 
       # Set an anchor to first homogonize instances of URL's, then replace all the anchors
       anchor = "URL_REPLACEMENT_ANCHOR_00000"
@@ -167,6 +167,8 @@ namespace :deploy do
       # Set localhost entries to the anchor
       db_data = db_data.gsub(/localhost\%3A8000/, anchor)
       db_data = db_data.gsub(/localhost:8000/, anchor)
+      db_data = db_data.gsub(/localhost\%3A8001/, anchor)
+      db_data = db_data.gsub(/localhost:8001/, anchor)
 
       # Replace anchors with the correct target URL
       db_data = db_data.gsub(anchor, "#{opts['deployer']['fqdn']['staging']}")

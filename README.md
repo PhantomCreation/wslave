@@ -208,45 +208,6 @@ wslave will update to the newest version when you run ```bundle update```. Befor
 you should probably make a commit to your git repository. After updating, you can update your 
 files to the latest wslave version by running ```wslave update```
 
-Sage Themes
------------
-wslave has integrated Sage theme helpers.
-
-### Existing Sage Themes
-If you have an extisting Sage theme you will need to 
-copy the files into public/wp-content/themes/"theme name" (replacing "theme name" with the actual 
-name of your theme). Then create a config file at `config/sage.yml` with the following 
-content:
-```yml
----
-:theme: "theme name"
-```
-(Again, replacing "theme name" with the name of your theme). 
-
-### New Sage Themes
-You can create a new sage theme with ```wslave sage new theme_name```, repacing theme_name with 
-the name of the theme you wish to create.  
-**CAUTION** When/if asked ```Do you want to remove the existing VCS (.git, .svn..) history?``` 
-answer **n**. Otherwise you will have to re-add all the wslave project files to git. We have no 
-idea why Sage does this...
-
-### Updating/Installing Packages
-You can of course work directly with yarn/composer in your theme directory, or use 
-```wslave sage update```.
-
-### Building Theme Files
-You can of course work directly with yarn/composer in your theme directory, or use 
-```wslave sage build```
-
-### Produciton Build and Deployment
-For static deployment we don't want to commit the vendor and dist directories to SCM, so there's 
-an extra task in Capistrano that's been added to do this for us if you're using the wslave 
-deployment chain. The command to do this would be ```cap staging deploy:sage``` or 
-```cap production deploy:sage``` for staging or production respectively.  
-  
-To do a production build without Capistrano simply use ```wslave sage production``` and assets 
-will be compiled and placed in the appropriate locations in your theme directory.
-
 Porting an Existing WordPress Installation to wslave
 ----------------------------------------------------
 As long as you have some basic tools you can quickly port most WordPress installations into 
@@ -343,6 +304,63 @@ rake -T
 ```sh
 cap production -T
 ```
+
+Extra Functionality
+===================
+wslave integrates/allows for some other tools to be run comfortably within the wslave installation. 
+Currently these include:
+* Sage theme generation and management helpers from the wslave command.
+* wp-cli from the installation directory.
+
+Sage Themes
+-----------
+wslave has integrated Sage theme helpers.
+
+### Existing Sage Themes
+If you have an extisting Sage theme you will need to 
+copy the files into public/wp-content/themes/"theme name" (replacing "theme name" with the actual 
+name of your theme). Then create a config file at `config/sage.yml` with the following 
+content:
+```yml
+---
+:theme: "theme name"
+```
+(Again, replacing "theme name" with the name of your theme). 
+
+### New Sage Themes
+You can create a new sage theme with ```wslave sage new theme_name```, repacing theme_name with 
+the name of the theme you wish to create.  
+**CAUTION** When/if asked ```Do you want to remove the existing VCS (.git, .svn..) history?``` 
+answer **n**. Otherwise you will have to re-add all the wslave project files to git. We have no 
+idea why Sage does this...
+
+### Updating/Installing Packages
+You can of course work directly with yarn/composer in your theme directory, or use 
+```wslave sage update```.
+
+### Building Theme Files
+You can of course work directly with yarn/composer in your theme directory, or use 
+```wslave sage build```
+
+### Produciton Build and Deployment
+For static deployment we don't want to commit the vendor and dist directories to SCM, so there's 
+an extra task in Capistrano that's been added to do this for us if you're using the wslave 
+deployment chain. The command to do this would be ```cap staging deploy:sage``` or 
+```cap production deploy:sage``` for staging or production respectively.  
+  
+To do a production build without Capistrano simply use ```wslave sage production``` and assets 
+will be compiled and placed in the appropriate locations in your theme directory.
+
+wp-cli
+------
+wp-cli is not bundled with wslave, and must be installed separately, but you can use your local 
+wp-cli installation from within the root directory of your site as long as the development 
+containers are running (wslave server start). A settings file and extra handling is set up 
+for the development environment so no extra settings should be necessary. Keep in mind however 
+that wp-cli is not actually aware of the development environment and anything installed or 
+updated with wp-cli will not have :www-data group ownership (*we hope to add automatic group 
+ownership/file monitorning in the future). You may need to run `wslave sync` or 
+`sudo chown -R :www-data public/wp-content` to fix/adjust permissions.
 
 Caution
 =======

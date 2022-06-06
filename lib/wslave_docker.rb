@@ -69,7 +69,7 @@ class WSlaveDocker
 
   def console()
     return unless _check()
-    system("docker-compose exec web /bin/bash")
+    system("docker-compose exec nweb sh -c \"cd /var/www/html; exec /bin/bash\"")
   end
 
   def _check()

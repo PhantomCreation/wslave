@@ -25,8 +25,8 @@ class WSlaveCLI < Thor
   option :wppath, default: '',
     desc: 'specify the path to a cloned git wordpress distribution, EG: "--wppath /shared/wordpress".
       NOTE: This is relative to the new app path.
-      NOTE: If no data is found in this directory, wslave will clone the official WordPress repository here and 
-      copy it. Also, if there is data here that does not match the format of the official WordPress repository, 
+      NOTE: If no data is found in this directory, wslave will clone the official WordPress repository here and
+      copy it. Also, if there is data here that does not match the format of the official WordPress repository,
       most wslave functionality will probably be broken.'
   def new(path = './')
     require_relative '../lib/wslave_new'
@@ -79,6 +79,18 @@ class WSlaveCLI < Thor
       puts 'Stopping server...'
       require_relative '../lib/wslave_docker'
       WSlaveDocker.new().server(:remove, options['f'])
+    end
+
+    desc 'log', "Starts tracing the log"
+    def log()
+      require_relative '../lib/wslave_docker'
+      WSlaveDocker.new().log()
+    end
+
+    desc 'console', "Opens a shell/console connection in the nweb container (container must be running)"
+    def console()
+      require_relative '../lib/wslave_docker'
+      WSlaveDocker.new().console()
     end
   end
   desc 'server COMMAND [options]', "Control the development server container"
