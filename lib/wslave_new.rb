@@ -88,8 +88,8 @@ class WSlaveNew
   end
 
   def get_stable_branch_version(path)
-    latest_major = 5
-    latest_minor = 7
+    latest_major = 6
+    latest_minor = 2
 
     reg = /^(\d*)\.(\d)-branch$/
     puts "> Checking for WordPress versions in: #{path}"
@@ -99,7 +99,10 @@ class WSlaveNew
     g.branches.remote.each do |branch|
       ver = reg.match(branch.name)
       if (ver) # If the branch matched the x.y-branch pattern
-        if ((ver[1].to_i >= latest_major) && (ver[2].to_i > latest_minor))
+        if (ver[1].to_i > latest_major)
+          latest_major = ver[1].to_i
+          latest_minor = ver[2].to_i
+        elsif ((ver[1].to_i >= latest_major) && (ver[2].to_i > latest_minor))
           latest_major = ver[1].to_i
           latest_minor = ver[2].to_i
         end

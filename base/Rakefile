@@ -19,7 +19,7 @@ namespace :db do
     task :backup do
       rm_dbfile('dev')
       puts 'Creating backup of development database...'
-      sh 'docker-compose exec db sh -c "exec mysqldump --single-transaction -hlocalhost -uroot -pwordpress wordpress > /db/wordpress.sql"'
+      sh 'docker-compose exec db sh -c "exec mariadb-dump --single-transaction -hlocalhost -uroot -pwordpress wordpress > /db/wordpress.sql"'
       sh 'docker-compose exec db sh -c "chown :www-data /db/wordpress.sql"'
       sh 'docker-compose exec db sh -c "chmod 664 /db/wordpress.sql"'
     end
