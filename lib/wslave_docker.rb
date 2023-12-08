@@ -29,38 +29,38 @@ class WSlaveDocker
   def start(force = false)
     return unless _check()
     _force_down() if force
-    `docker-compose stop` # Shutdown existing instances
+    `docker compose stop` # Shutdown existing instances
     _unfuck_dot_htaccess()
     WSlaveTools.set_dev_perms
-    `docker-compose build`
-    `docker-compose start -d`
-    `docker-compose up -d`
+    `docker compose build`
+    # `docker compose start -d`
+    `docker compose up -d`
   end
 
   def stop(force = false)
     return unless _check()
     _force_down() if force
-    `docker-compose stop`
+    `docker compose stop`
   end
 
   def reset(force = false)
     return unless _check()
     _force_down() if force
-    `docker-compose down -v`
-    `docker-compose build`
-    `docker-compose up -d`
+    `docker compose down -v`
+    `docker compose build`
+    `docker compose up -d`
   end
 
   def remove(force = false)
     return unless _check()
     _force_down() if force
-    `docker-compose down -v`
+    `docker compose down -v`
   end
 
   def log()
     return unless _check()
     begin
-      system("docker-compose logs -f")
+      system("docker compose logs -f")
     rescue Exception => e
       puts "\n\nEnding log trace. NOTE: Server containers are still running!\n\n"
       return
@@ -69,7 +69,7 @@ class WSlaveDocker
 
   def console()
     return unless _check()
-    system("docker-compose exec nweb sh -c \"cd /var/www/html; exec /bin/bash\"")
+    system("docker compose exec nweb sh -c \"cd /var/www/html; exec /bin/bash\"")
   end
 
   def _check()
@@ -80,7 +80,7 @@ class WSlaveDocker
   end
 
   def _force_down()
-    `docker-compose down --remove-orphans`
+    `docker compose down --remove-orphans`
   end
 
   # Sometimes the docker container or a windows fs will screw up or delete .htaccess
