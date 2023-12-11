@@ -3,27 +3,26 @@ require 'thor'
 require 'fileutils'
 
 class WSlaveCLI < Thor
-
   def self.exit_on_failure?
     true
   end
 
-  desc 'version', "Prints the version of the installed WSlave"
-  def version()
+  desc 'version', 'Prints the version of the installed WSlave'
+  def version
     require 'rubygems'
-    spec = Gem::Specification::load("#{__dir__}/../wslave.gemspec")
+    spec = Gem::Specification.load("#{__dir__}/../wslave.gemspec")
     puts spec.version
   end
 
-  desc 'new [APP_PATH]', "Generate a new app at APP_PATH"
-  long_desc "Creates a new application in the current directory or in the specificed path."
+  desc 'new [APP_PATH]', 'Generate a new app at APP_PATH'
+  long_desc 'Creates a new application in the current directory or in the specificed path.'
   option :version, default: '',
-    desc: 'Specify the version, EG: "--version 5.3". To specify edge/development master use "--version edge".'
+                   desc: 'Specify the version, EG: "--version 5.3". To specify edge/development master use "--version edge".'
   option :wspath, default: '',
-    desc: 'specify the path to the wslave distribution, EG: "--wspath ../wslave".
+                  desc: 'specify the path to the wslave distribution, EG: "--wspath ../wslave".
       NOTE: This is relative to the new app path.'
   option :wppath, default: '',
-    desc: 'specify the path to a cloned git wordpress distribution, EG: "--wppath /shared/wordpress".
+                  desc: 'specify the path to a cloned git wordpress distribution, EG: "--wppath /shared/wordpress".
       NOTE: This is relative to the new app path.
       NOTE: If no data is found in this directory, wslave will clone the official WordPress repository here and
       copy it. Also, if there is data here that does not match the format of the official WordPress repository,
@@ -34,66 +33,66 @@ class WSlaveCLI < Thor
     WSlaveNew.new(real_path, options['version'], options['wspath'], options['wppath'])
   end
 
-  desc 'update', "Updates toolchain"
-  long_desc "Updates toolchain. Will not overwrite existing configuration files."
-  def update()
+  desc 'update', 'Updates toolchain'
+  long_desc 'Updates toolchain. Will not overwrite existing configuration files.'
+  def update
     require_relative '../lib/wslave_update'
-    WSlaveUpdate.new()
+    WSlaveUpdate.new
   end
 
-  desc 'sync', "Synchronizes submodules and file permissions"
-  def sync()
+  desc 'sync', 'Synchronizes submodules and file permissions'
+  def sync
     require_relative '../lib/wslave_tools'
     puts 'Synchronizing...'
-    WSlaveTools.sync()
+    WSlaveTools.sync
   end
 
   class Server < Thor
-    desc 'start [options]', "Starts the development server"
+    desc 'start [options]', 'Starts the development server'
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
-    def start()
+    def start
       puts 'Starting server...'
       require_relative '../lib/wslave_docker'
-      WSlaveDocker.new().server(:start, options['f'])
+      WSlaveDocker.new.server(:start, options['f'])
     end
 
-    desc 'stop [options]', "Stops the development server"
+    desc 'stop [options]', 'Stops the development server'
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
-    def stop()
+    def stop
       puts 'Stopping server...'
       require_relative '../lib/wslave_docker'
-      WSlaveDocker.new().server(:stop, options['f'])
+      WSlaveDocker.new.server(:stop, options['f'])
     end
 
-    desc 'reset [options]', "Deletes all container data and volumes, then rebuilds and restarts the containers"
+    desc 'reset [options]', 'Deletes all container data and volumes, then rebuilds and restarts the containers'
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
-    def reset()
+    def reset
       puts 'Stopping server...'
       require_relative '../lib/wslave_docker'
-      WSlaveDocker.new().server(:reset, options['f'])
+      WSlaveDocker.new.server(:reset, options['f'])
     end
 
-    desc 'remove [options]', "Shuts down containers and deletes all container data and volumes"
+    desc 'remove [options]', 'Shuts down containers and deletes all container data and volumes'
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
-    def remove()
+    def remove
       puts 'Stopping server...'
       require_relative '../lib/wslave_docker'
-      WSlaveDocker.new().server(:remove, options['f'])
+      WSlaveDocker.new.server(:remove, options['f'])
     end
 
-    desc 'log', "Starts tracing the log"
-    def log()
+    desc 'log', 'Starts tracing the log'
+    def log
       require_relative '../lib/wslave_docker'
-      WSlaveDocker.new().log()
+      WSlaveDocker.new.log
     end
 
-    desc 'console', "Opens a shell/console connection in the nweb container (container must be running)"
-    def console()
+    desc 'console', 'Opens a shell/console connection in the nweb container (container must be running)'
+    def console
       require_relative '../lib/wslave_docker'
-      WSlaveDocker.new().console()
+      WSlaveDocker.new.console
     end
   end
-  desc 'server COMMAND [options]', "Control the development server container"
+  desc 'server COMMAND [options]', 'Control the development server container'
   subcommand 'server', Server
 end
 
