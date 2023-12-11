@@ -10,31 +10,29 @@ host_addr = opts['deployer']['host']['production']
 multisite_root = opts['deployer']['root']
 site_fqdn = opts['deployer']['fqdn']['production']
 
-disable_rsync = (opts.include?('options') && opts['options'].include?('rsync_enabled') &&
-          opts['options']['rsync_enabled'] == false)
+disable_rsync = opts.include?('options') && opts['options'].include?('rsync_enabled') &&
+                opts['options']['rsync_enabled'] == false
 
-if (opts['deployer'].include?('branch') && opts['deployer']['branch'].include?('production'))
-  set :branch, opts['deployer']['branch']['production']
-end
+set :branch, opts['deployer']['branch']['production'] if opts['deployer'].include?('branch') && opts['deployer']['branch'].include?('production')
 
 role :web, "#{deploy_user}@#{host_addr}"
 
 set :tmp_dir, "#{multisite_root}/tmp"
 deploy_path = "#{multisite_root}/#{site_fqdn}"
 
-set :linked_dirs, %w{public/wp-content/uploads public/wordpress public/wp-content/upgrade public/wp-content/plugins public/data tmp}
-set :linked_files, %w{public/wp-config.php}
+set :linked_dirs, %w[public/wp-content/uploads public/wordpress public/wp-content/upgrade public/wp-content/plugins public/data tmp]
+set :linked_files, %w[public/wp-config.php]
 
 set :deploy_to, deploy_path
 
 namespace :deploy do
-  desc "Generate wp-config.php for profile"
+  desc 'Generate wp-config.php for profile'
   task :wp_config do
     on roles(:web) do
       invoke 'deploy:check:make_linked_dirs'
-      require_relative '../deploy-tools/gen-wp-config'
-      FileUtils.mkdir('./tmp') unless Dir.exist?('./tmp')
-      GenerateWPConfig('production', './tmp')
+      require_relative '../deploy-tools/gen_wp_config'
+      FileUtils.mkdir_p('./tmp')
+      generate_wp_config('production', './tmp')
       upload! './tmp/wp-config.php', "#{deploy_path}/shared/public/wp-config.php"
     end
   end
@@ -101,13 +99,13 @@ namespace :deploy do
       puts 'Replacing localhost:8000 / localhost:8001 and Staging URLs with Production URLs...'
 
       # Set an anchor to first homogonize instances of URL's, then replace all the anchors
-      anchor = "URL_REPLACEMENT_ANCHOR_00000"
+      anchor = 'URL_REPLACEMENT_ANCHOR_00000'
 
       # Create a backup, download it, and remove remote copy
       execute "mkdir -p #{deploy_path}/db/tmp"
       execute "mysqldump --opt --user=#{db_info['production']['username']} --password=#{db_info['production']['password']} --host=#{db_info['production']['host']} #{db_info['production']['database']} > #{deploy_path}/db/tmp/wordpress.sql"
-      FileUtils.mkdir_p('./db/tmp') unless Dir.exist?('./db/tmp')
-      download! "#{deploy_path}/db/tmp/wordpress.sql", "db/tmp/wordpress.sql"
+      FileUtils.mkdir_p('./db/tmp')
+      download! "#{deploy_path}/db/tmp/wordpress.sql", 'db/tmp/wordpress.sql'
       execute "rm #{deploy_path}/db/tmp/*.sql"
 
       # Regex replace in file
@@ -118,21 +116,19 @@ namespace :deploy do
       db_data = db_data.gsub(/#{opts['deployer']['fqdn']['production']}/, anchor)
 
       # Set production URL's to the anchor
-      if opts['deployer']['fqdn']['production'] != ''
-        db_data = db_data.gsub(/#{opts['deployer']['fqdn']['production']}/, anchor)
-      end
+      db_data = db_data.gsub(/#{opts['deployer']['fqdn']['production']}/, anchor) if opts['deployer']['fqdn']['production'] != ''
 
       # Set localhost entries to the anchor
-      db_data = db_data.gsub(/localhost\%3A8000/, anchor)
-      db_data = db_data.gsub(/localhost:8000/, anchor)
-      db_data = db_data.gsub(/localhost\%3A8001/, anchor)
-      db_data = db_data.gsub(/localhost:8001/, anchor)
+      db_data = db_data.gsub('localhost%3A8000', anchor)
+      db_data = db_data.gsub('localhost:8000', anchor)
+      db_data = db_data.gsub('localhost%3A8001', anchor)
+      db_data = db_data.gsub('localhost:8001', anchor)
 
       # Replace anchors with the correct target URL
-      db_data = db_data.gsub(anchor, "#{opts['deployer']['fqdn']['production']}")
+      db_data = db_data.gsub(anchor, opts['deployer']['fqdn']['production'])
 
       # Save results
-      File.open('db/tmp/wordpress.sql', "w") {|file| file.puts db_data }
+      File.open('db/tmp/wordpress.sql', 'w') { |file| file.puts db_data }
 
       # Upload file and seed
       upload! 'db/tmp/wordpress.sql', "#{deploy_path}/db/tmp/wordpress.sql"
@@ -148,7 +144,7 @@ namespace :deploy do
   task :set_permissions do
     on roles(:web) do
       puts 'Setting permissions'
-      if deploy_group != nil
+      unless deploy_group.nil?
         puts "Recrusively setting group to #{deploy_group}..."
         execute "chown -R :#{deploy_group} #{deploy_path}"
         puts 'Allowing group level Write permission...'
@@ -161,9 +157,7 @@ namespace :deploy do
   task :set_symlink do
     on roles(:web) do
       puts 'Setting symlink'
-      if (opts['deployer'].include?('symlink') && opts['deployer']['symlink'].include?('production'))
-        execute "ln -s #{deploy_path}/current/public #{opts['deployer']['root']}/#{opts['deployer']['symlink']['production']}"
-      end
+      execute "ln -s #{deploy_path}/current/public #{opts['deployer']['root']}/#{opts['deployer']['symlink']['production']}" if opts['deployer'].include?('symlink') && opts['deployer']['symlink'].include?('production')
     end
   end
 
@@ -197,12 +191,12 @@ namespace :deploy do
   task :destruct do
     on roles(:web) do
       execute "mysql --user=#{db_info['production']['username']} " \
-        "--password=#{db_info['production']['password']} --host=#{db_info['production']['host']} " \
-        "-Nse 'show tables' #{db_info['production']['database']} | " \
-        "while read table; do echo \"drop table $table;\"; done | " \
-        "mysql --user=#{db_info['production']['username']} " \
-        "--password=#{db_info['production']['password']} --host=#{db_info['production']['host']} " \
-        "#{db_info['production']['database']}"
+              "--password=#{db_info['production']['password']} --host=#{db_info['production']['host']} " \
+              "-Nse 'show tables' #{db_info['production']['database']} | " \
+              'while read table; do echo "drop table $table;"; done | ' \
+              "mysql --user=#{db_info['production']['username']} " \
+              "--password=#{db_info['production']['password']} --host=#{db_info['production']['host']} " \
+              "#{db_info['production']['database']}"
 
       execute "rm -rf #{deploy_path}/*"
     end
@@ -210,18 +204,18 @@ namespace :deploy do
 end
 
 namespace :db do
-  desc "Backup DB"
+  desc 'Backup DB'
   task :backup do
     on roles(:web) do
       timestamp = DateTime.now
       execute "mkdir -p #{deploy_path}/db/backups/production/"
       execute "mysqldump --opt --user=#{db_info['production']['username']} --password=#{db_info['production']['password']} --host=#{db_info['production']['host']} #{db_info['production']['database']} > #{deploy_path}/db/backups/production/#{timestamp}.sql"
-      FileUtils.mkdir_p('./db/production') unless Dir.exist?('./db/production')
-      download! "#{deploy_path}/db/backups/production/#{timestamp}.sql", "db/production/wordpress.sql"
+      FileUtils.mkdir_p('./db/production')
+      download! "#{deploy_path}/db/backups/production/#{timestamp}.sql", 'db/production/wordpress.sql'
     end
   end
 
-  desc "Clear remote backup records"
+  desc 'Clear remote backup records'
   task :clear_remote_backups do
     on roles(:web) do
       execute "rm #{deploy_path}/db/backups/production/*.sql"
@@ -241,20 +235,20 @@ namespace :db do
 end
 
 namespace :data do
-  desc "Backup data"
+  desc 'Backup data'
   task :backup do
     on roles(:web) do
-      download! "#{deploy_path}/shared/public/wp-content/uploads", "./public/wp-content/", recursive: true
-      download! "#{deploy_path}/shared/public/wp-content/plugins", "./public/wp-content/", recursive: true
-      download! "#{deploy_path}/shared/public/wp-content/upgrade", "./public/wp-content/", recursive: true
-      download! "#{deploy_path}/current/public/wp-content/themes", "./public/wp-content/", recursive: true
+      download! "#{deploy_path}/shared/public/wp-content/uploads", './public/wp-content/', recursive: true
+      download! "#{deploy_path}/shared/public/wp-content/plugins", './public/wp-content/', recursive: true
+      download! "#{deploy_path}/shared/public/wp-content/upgrade", './public/wp-content/', recursive: true
+      download! "#{deploy_path}/current/public/wp-content/themes", './public/wp-content/', recursive: true
     end
   end
 
-  desc "Backup data with rsync"
+  desc 'Backup data with rsync'
   task :sync_backup do
     on roles(:web) do
-      puts "Syncing Backup..."
+      puts 'Syncing Backup...'
       `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads/ ./public/wp-content/uploads/`
       `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins/ ./public/wp-content/plugins/`
       `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/upgrade/ ./public/wp-content/upgrade/`

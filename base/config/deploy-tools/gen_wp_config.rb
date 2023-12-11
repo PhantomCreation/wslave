@@ -2,10 +2,10 @@ require 'erb'
 require 'yaml'
 require 'ostruct'
 
-def GenerateWPConfig(profile = 'production', out_path = './')
-  require_relative 'gen-salts' # Generate salts if necessary
+def generate_wp_config(profile = 'production', out_path = './')
+  require_relative 'gen_salts' # Generate salts if necessary
 
-  config_path = File.dirname(File.expand_path(File.dirname(__FILE__)))
+  config_path = File.dirname(__dir__)
   vars = {}
   vars[:profile] = profile.to_sym
   vars[:db_info] = YAML.load_file("#{config_path}/database.yml", aliases: true)
@@ -13,6 +13,6 @@ def GenerateWPConfig(profile = 'production', out_path = './')
 
   erb_source = File.read("#{config_path}/deploy-tools/wp-config.php.erb")
   rend = ERB.new(erb_source)
-  res = rend.result(OpenStruct.new(vars).instance_eval { binding })
+  res = rend.result(vars.instance_eval { binding })
   File.write("#{out_path}/wp-config.php", res)
 end
