@@ -27,13 +27,13 @@ class WSlaveNew
       end
     end
 
-    FileUtils.mkdir_p(path)
+    FileUtils.mkdir_p path
 
-    Dir.chdir(path)
+    Dir.chdir path
 
     puts "  > Setting up WordPress WSlave setup in: #{path}"
-    FileUtils.cp_r(Dir.glob("#{base_path}/*"), path)
-    FileUtils.cp_r(Dir.glob("#{template_path}/*"), path)
+    FileUtils.cp_r Dir.glob("#{base_path}/*"), path
+    FileUtils.cp_r Dir.glob("#{template_path}/*"), path
     add_path_to_gemspec(wspath, path) if manual_path
 
     spec = Gem::Specification.load("#{wspath}/wslave.gemspec")
@@ -51,7 +51,7 @@ class WSlaveNew
     FileUtils.touch("#{path}/public/wp-content/uploads/.gitkeep")
     FileUtils.mkdir_p("#{path}/public/wp-content/upgrade")
     FileUtils.touch("#{path}/public/wp-content/upgrade/.gitkeep")
-    Dir.chdir(path)
+    Dir.chdir path
 
     puts '  > Preparing static data directory'
     FileUtils.mkdir_p("#{path}/public/data")
