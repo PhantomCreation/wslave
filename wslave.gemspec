@@ -1,4 +1,6 @@
 Gem::Specification.new do |s|
+  s.metadata['rubygems_mfa_required'] = 'true'
+
   s.name        = 'wslave'
   s.version     = '0.4.0'
   s.licenses    = ['GPL-3.0', 'AGPL-3.0']
