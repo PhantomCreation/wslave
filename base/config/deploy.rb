@@ -218,6 +218,21 @@ namespace :db do
     end
   end
 
+  desc 'Create DB snapshot to latest_release directory'
+  task :snapshot, [:target_directory] do |t, args|
+    on roles(:web) do
+      execute "mkdir -p #{args.target_directory}"
+      execute "mysqldump --opt --user=#{db_info[fetch(:stage)]['username']} --password=#{db_info[fetch(:stage)]['password']} --host=#{db_info[fetch(:stage)]['host']} #{db_info[fetch(:stage)]['database']} > #{args.target_directory}/wordpress.sql"
+    end
+  end
+
+  desc 'Restore DB from latest_release directory snapshot'
+  task :restore, [:target_directory] do |t, args|
+    on roles(:web) do
+      execute "mysql -h#{db_info[fetch(:stage)]['host']} -u#{db_info[fetch(:stage)]['username']} -p#{db_info[fetch(:stage)]['password']} #{db_info[fetch(:stage)]['database']} < #{args.target_directory}/wordpress.sql"
+    end
+  end
+
   desc 'Clear remote backup records'
   task :clear_remote_backups do
     on roles(:web) do
@@ -248,6 +263,42 @@ namespace :data do
     end
   end
 
+  desc 'Create data snapshot to latest_release directory with rsync'
+  task :sync_snapshot, [:target_directory] do |t, args|
+    on roles(:web) do
+      execute "mkdir -p #{target_directory}"
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/uploads`
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/plugins`
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/upgrade #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/upgrade`
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/themes`
+    end
+  end
+
+  desc 'Create data snapshot to latest_release directory'
+  task :snapshot, [:target_directory] do |t, args|
+    on roles(:web) do
+      # TODO
+      execute "mkdir -p #{target_directory}"
+    end
+  end
+
+  desc 'Restore data from latest_release directory snapshot with rsync'
+  task :sync_restore, [:target_directory] do |t, args|
+    on roles(:web) do
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/uploads #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads`
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/plugins #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins`
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/upgrade #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/upgrade`
+      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/themes #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes`
+    end
+  end
+
+  desc 'Restore data from latest_release directory snapshot'
+  task :restore, [:target_directory] do |t, args|
+    on roles(:web) do
+      # TODO
+    end
+  end
+
   desc 'Backup data with rsync'
   task :sync_backup do
     on roles(:web) do
@@ -269,3 +320,35 @@ task :backup do
     invoke('data:sync_backup')
   end
 end
+
+desc 'Excute snapshot before deploy'
+task :snapshot do
+  on roles(:web) do
+    unless test("[ -d #{fetch(:deploy_to)} ]")
+      latest_release = Dir.glob(File.join("#{deploy_path}/releases", '*/')).max_by { |f| File.mtime(f) }
+      target_directory = "#{deploy_path}/snapshot/#{fetch(:stage)}/#{args.latest_release}"
+      invoke('db:snapshot', "#{target_directory}/db")
+      if disable_rsync
+        invoke('data:snapshot', target_directory)
+      else
+        invoke('data:sync_snapshot', target_directory)
+      end
+    end
+  end
+end
+before :starting, :snapshot
+
+desc 'Excute restore after rollback'
+task :restore do
+  on roles(:web) do
+    latest_release = Dir.glob(File.join("#{deploy_path}/releases", '*/')).max_by { |f| File.mtime(f) }
+    target_directory = "#{deploy_path}/snapshot/#{fetch(:stage)}/#{args.latest_release}"
+    invoke('db:restore', "#{target_directory}/db")
+    if disable_rsync
+      invoke('data:restore', target_directory)
+    else
+      invoke('data:sync_restore', target_directory)
+    end
+  end
+end
+after :finishing_rollback, :restore
