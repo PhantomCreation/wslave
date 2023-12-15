@@ -1,6 +1,5 @@
 require 'yaml'
 require 'date'
-require 'wslave_sage'
 
 opts = YAML.load_file('config/definitions.yml', aliases: true)
 db_info = YAML.load_file('config/database.yml', aliases: true)
@@ -11,14 +10,14 @@ host_addr = opts['deployer']['host']['production']
 multisite_root = opts['deployer']['root']
 site_fqdn = opts['deployer']['fqdn']['production']
 
-disable_rsync = (opts.include?('options') && opts['options'].include?('rsync_enabled') && 
+disable_rsync = (opts.include?('options') && opts['options'].include?('rsync_enabled') &&
           opts['options']['rsync_enabled'] == false)
 
 if (opts['deployer'].include?('branch') && opts['deployer']['branch'].include?('production'))
   set :branch, opts['deployer']['branch']['production']
 end
 
-role :web, "#{deploy_user}@#{host_addr}" 
+role :web, "#{deploy_user}@#{host_addr}"
 
 set :tmp_dir, "#{multisite_root}/tmp"
 deploy_path = "#{multisite_root}/#{site_fqdn}"
@@ -93,47 +92,6 @@ namespace :deploy do
   task :upload_static_data do
     on roles(:web) do
       upload! './public/data', "#{deploy_path}/shared/public/data/", recursive: true
-    end
-  end
-
-  desc 'Builds and Syncs the project Sage theme'
-  task :sync_sage_theme do
-    on roles(:web) do
-      wss = WSlaveSage.new()
-      sage_theme_name = wss.theme_name?
-      if (sage_theme_name == '')
-        puts "Couldn't find a Sage theme for this project."
-      else
-        wss.production()
-        `rsync -avzPhu --delete ./public/wp-content/themes/#{sage_theme_name}/vendor/ #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/vendor/`
-        `rsync -avzPhu --delete ./public/wp-content/themes/#{sage_theme_name}/dist/ #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/dist/`
-      end
-    end
-  end
-
-  desc 'Builds and Uploads the project Sage theme'
-  task :upload_sage_theme do
-    on roles(:web) do
-      wss = WSlaveSage.new()
-      sage_theme_name = wss.theme_name?
-      if (sage_theme_name == '')
-        puts "Couldn't find a Sage theme for this project."
-      else
-        wss.production()
-        upload! "./public/wp-content/themes/#{sage_theme_name}/vendor/", "#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/", recursive: true
-        upload! "./public/wp-content/themes/#{sage_theme_name}/dist/", "#{deploy_path}/current/public/wp-content/themes/#{sage_theme_name}/", recursive: true
-      end
-    end
-  end
-
-  desc 'Builds and Deploys the project Sage theme'
-  task :sage do
-    on roles(:web) do
-      if disable_rsync
-        invoke('deploy:upload_sage_theme')
-      else
-        invoke('deploy:sync_sage_theme')
-      end
     end
   end
 
@@ -230,7 +188,6 @@ namespace :deploy do
       invoke('deploy')
       invoke('db:seed')
       invoke('deploy:chikan')
-      invoke('deploy:sage')
       invoke('deploy:set_permissions')
       invoke('deploy:set_symlink')
     end

@@ -95,41 +95,6 @@ class WSlaveCLI < Thor
   end
   desc 'server COMMAND [options]', "Control the development server container"
   subcommand 'server', Server
-
-  class Sage < Thor
-    desc 'create THEME_NAME', "Creates a theme with the specified name using Sage"
-    def create(theme_name = "wslave_sage_theme")
-      require_relative '../lib/wslave_sage'
-      puts "Generating sage theme base for #{theme_name}"
-      WSlaveSage.new().create(theme_name)
-    end
-
-    desc 'update', "Updates theme generator components"
-    def update
-      require_relative '../lib/wslave_sage'
-      WSlaveSage.new().update()
-    end
-
-    desc 'dev', "Starts a development server which dynamically compiles the theme"
-    def dev
-      require_relative '../lib/wslave_sage'
-      WSlaveSage.new().dev()
-    end
-
-    desc 'build', "Builds the theme (generates development grade static assets)"
-    def build
-      require_relative '../lib/wslave_sage'
-      WSlaveSage.new().build()
-    end
-
-    desc 'production', "Builds the theme (generates production grade static assets)"
-    def production
-      require_relative '../lib/wslave_sage'
-      WSlaveSage.new().production()
-    end
-  end
-  desc 'sage COMMAND', "Generates and manages a Sage theme"
-  subcommand 'sage', Sage
 end
 
 WSlaveCLI.start(ARGV)
