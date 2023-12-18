@@ -8,16 +8,16 @@ db_info = YAML.load_file('config/database.yml', aliases: true)
 
 deploy_user = opts['deployer']['user']
 deploy_group = opts['deployer']['www_data_group']
-host_addr = opts['deployer']['host'][fetch(:stage)]
+host_addr = opts['deployer']['host'][fetch(:stage).to_s]
 multisite_root = opts['deployer']['root']
-site_fqdn = opts['deployer']['fqdn'][fetch(:stage)]
+site_fqdn = opts['deployer']['fqdn'][fetch(:stage).to_s]
 disable_rsync = opts.include?('options') && opts['options'].include?('rsync_enabled') && opts['options']['rsync_enabled'] == false
 deploy_path = "#{multisite_root}/#{site_fqdn}"
 
 set :application, opts['app']['name']
 set :repo_url, opts['app']['repo']
 
-set :branch, opts['deployer']['branch'][fetch(:stage)] if opts['deployer'].include?('branch') && opts['deployer']['branch'].include?(fetch(:stage))
+set :branch, opts['deployer']['branch'][fetch(:stage).to_s] if opts['deployer'].include?('branch') && opts['deployer']['branch'].include?(fetch(:stage).to_s)
 
 role :web, "#{deploy_user}@#{host_addr}"
 
@@ -33,9 +33,9 @@ namespace :deploy do
   task :wp_config do
     on roles(:web) do
       invoke 'deploy:check:make_linked_dirs'
-      require_relative '../deploy-tools/gen_wp_config'
+      require_relative './deploy-tools/gen_wp_config'
       FileUtils.mkdir_p('./tmp')
-      generate_wp_config(fetch(:stage), './tmp')
+      generate_wp_config(fetch(:stage).to_s, './tmp')
       upload! './tmp/wp-config.php', "#{deploy_path}/shared/public/wp-config.php"
     end
   end
@@ -96,17 +96,17 @@ namespace :deploy do
     end
   end
 
-  desc "Finds and replaces localhost:8000 / localhost:8001 and your other address with the #{fetch(:stage)} address"
+  desc "Finds and replaces localhost:8000 / localhost:8001 and your other address with the #{fetch(:stage).to_s} address"
   task :chikan do
     on roles(:web) do
-      puts "Replacing localhost:8000 / localhost:8001 and other URLs with #{fetch(:stage)} URLs..."
+      puts "Replacing localhost:8000 / localhost:8001 and other URLs with #{fetch(:stage).to_s} URLs..."
 
       # Set an anchor to first homogonize instances of URL's, then replace all the anchors
       anchor = 'URL_REPLACEMENT_ANCHOR_00000'
 
       # Create a backup, download it, and remove remote copy
       execute "mkdir -p #{deploy_path}/db/tmp"
-      execute "mysqldump --opt --user=#{db_info[fetch(:stage)]['username']} --password=#{db_info[fetch(:stage)]['password']} --host=#{db_info[fetch(:stage)]['host']} #{db_info[fetch(:stage)]['database']} > #{deploy_path}/db/tmp/wordpress.sql"
+      execute "mysqldump --opt --user=#{db_info[fetch(:stage).to_s]['username']} --password=\"#{db_info[fetch(:stage).to_s]['password']}\" --host=\"#{db_info[fetch(:stage).to_s]['host']}\" #{db_info[fetch(:stage).to_s]['database']} > #{deploy_path}/db/tmp/wordpress.sql"
       FileUtils.mkdir_p('./db/tmp')
       download! "#{deploy_path}/db/tmp/wordpress.sql", 'db/tmp/wordpress.sql'
       execute "rm #{deploy_path}/db/tmp/*.sql"
@@ -116,7 +116,7 @@ namespace :deploy do
 
       # This may seem roundabout, but in order to avoid mangling the target URL we need to first
       # replace instances of it with something that won't match
-      db_data = db_data.gsub(/#{opts['deployer']['fqdn'][fetch(:stage)]}/, anchor)
+      db_data = db_data.gsub(/#{opts['deployer']['fqdn'][fetch(:stage).to_s]}/, anchor)
 
       # Set production URL's to the anchor
       db_data = db_data.gsub(/#{opts['deployer']['fqdn']['production']}/, anchor) if opts['deployer']['fqdn']['production'] != ''
@@ -128,14 +128,14 @@ namespace :deploy do
       db_data = db_data.gsub('localhost:8001', anchor)
 
       # Replace anchors with the correct target URL
-      db_data = db_data.gsub(anchor, opts['deployer']['fqdn'][fetch(:stage)])
+      db_data = db_data.gsub(anchor, opts['deployer']['fqdn'][fetch(:stage).to_s])
 
       # Save results
       File.open('db/tmp/wordpress.sql', 'w') { |file| file.puts db_data }
 
       # Upload file and seed
       upload! 'db/tmp/wordpress.sql', "#{deploy_path}/db/tmp/wordpress.sql"
-      execute "mysql -h#{db_info[fetch(:stage)]['host']} -u#{db_info[fetch(:stage)]['username']} -p#{db_info[fetch(:stage)]['password']} #{db_info[fetch(:stage)]['database']} < #{deploy_path}/db/tmp/wordpress.sql"
+      execute "mysql -h#{db_info[fetch(:stage).to_s]['host']} -u#{db_info[fetch(:stage).to_s]['username']} -p#{db_info[fetch(:stage).to_s]['password']} #{db_info[fetch(:stage).to_s]['database']} < #{deploy_path}/db/tmp/wordpress.sql"
       execute "rm #{deploy_path}/db/tmp/*.sql"
 
       # Remove work file
@@ -160,7 +160,7 @@ namespace :deploy do
   task :set_symlink do
     on roles(:web) do
       puts 'Setting symlink'
-      execute "ln -s #{deploy_path}/current/public #{opts['deployer']['root']}/#{opts['deployer']['symlink'][fetch(:stage)]}" if opts['deployer'].include?('symlink') && opts['deployer']['symlink'].include?(fetch(:stage))
+      execute "ln -s #{deploy_path}/current/public #{opts['deployer']['root']}/#{opts['deployer']['symlink'][fetch(:stage).to_s]}" if opts['deployer'].include?('symlink') && opts['deployer']['symlink'].include?(fetch(:stage).to_s)
     end
   end
 
@@ -184,7 +184,7 @@ namespace :deploy do
       end
       invoke('deploy')
       invoke('db:seed')
-      invoke('deploy:chikan')
+      # invoke('deploy:chikan')
       invoke('deploy:set_permissions')
       invoke('deploy:set_symlink')
     end
@@ -193,13 +193,13 @@ namespace :deploy do
   desc 'Clear out remote DB tables and delete all remote files in deploy target directory'
   task :destruct do
     on roles(:web) do
-      execute "mysql --user=#{db_info[fetch(:stage)]['username']} " \
-              "--password=#{db_info[fetch(:stage)]['password']} --host=#{db_info[fetch(:stage)]['host']} " \
-              "-Nse 'show tables' #{db_info[fetch(:stage)]['database']} | " \
+      execute "mysql --user=#{db_info[fetch(:stage).to_s]['username']} " \
+              "--password=#{db_info[fetch(:stage).to_s]['password']} --host=#{db_info[fetch(:stage).to_s]['host']} " \
+              "-Nse 'show tables' #{db_info[fetch(:stage).to_s]['database']} | " \
               'while read table; do echo "drop table $table;"; done | ' \
-              "mysql --user=#{db_info[fetch(:stage)]['username']} " \
-              "--password=#{db_info[fetch(:stage)]['password']} --host=#{db_info[fetch(:stage)]['host']} " \
-              "#{db_info[fetch(:stage)]['database']}"
+              "mysql --user=#{db_info[fetch(:stage).to_s]['username']} " \
+              "--password=#{db_info[fetch(:stage).to_s]['password']} --host=#{db_info[fetch(:stage).to_s]['host']} " \
+              "#{db_info[fetch(:stage).to_s]['database']}"
 
       execute "rm -rf #{deploy_path}/*"
     end
@@ -207,36 +207,43 @@ namespace :deploy do
 end
 
 namespace :db do
-  desc 'Backup DB'
-  task :backup do
-    on roles(:web) do
-      timestamp = DateTime.now
-      execute "mkdir -p #{deploy_path}/db/backups/#{fetch(:stage)}/"
-      execute "mysqldump --opt --user=#{db_info[fetch(:stage)]['username']} --password=#{db_info[fetch(:stage)]['password']} --host=#{db_info[fetch(:stage)]['host']} #{db_info[fetch(:stage)]['database']} > #{deploy_path}/db/backups/#{fetch(:stage)}/#{timestamp}.sql"
-      FileUtils.mkdir_p("./db/#{fetch(:stage)}")
-      download! "#{deploy_path}/db/backups/#{fetch(:stage)}/#{timestamp}.sql", "db/#{fetch(:stage)}/wordpress.sql"
-    end
-  end
+  # desc 'Backup DB'
+  # task :backup do
+  #   on roles(:web) do
+  #     timestamp = DateTime.now
+  #     execute "mkdir -p #{deploy_path}/db/backups/#{fetch(:stage).to_s}/"
+  #     execute "mysqldump --opt --user=#{db_info[fetch(:stage).to_s]['username']} --password=#{db_info[fetch(:stage).to_s]['password']} --host=#{db_info[fetch(:stage).to_s]['host']} #{db_info[fetch(:stage).to_s]['database']} > #{deploy_path}/db/backups/#{fetch(:stage).to_s}/#{timestamp}.sql"
+  #     FileUtils.mkdir_p("./db/#{fetch(:stage).to_s}")
+  #     download! "#{deploy_path}/db/backups/#{fetch(:stage).to_s}/#{timestamp}.sql", "db/#{fetch(:stage).to_s}/wordpress.sql"
+  #   end
+  # end
 
   desc 'Create DB snapshot to latest_release directory'
   task :snapshot, [:target_directory] do |t, args|
     on roles(:web) do
       execute "mkdir -p #{args.target_directory}"
-      execute "mysqldump --opt --user=#{db_info[fetch(:stage)]['username']} --password=#{db_info[fetch(:stage)]['password']} --host=#{db_info[fetch(:stage)]['host']} #{db_info[fetch(:stage)]['database']} > #{args.target_directory}/wordpress.sql"
+      execute "mysqldump --opt --user=#{db_info[fetch(:stage).to_s]['username']} --password=#{db_info[fetch(:stage).to_s]['password']} --host=#{db_info[fetch(:stage).to_s]['host']} #{db_info[fetch(:stage).to_s]['database']} > #{args.target_directory}/wordpress.sql"
     end
   end
 
   desc 'Restore DB from latest_release directory snapshot'
   task :restore, [:target_directory] do |t, args|
     on roles(:web) do
-      execute "mysql -h#{db_info[fetch(:stage)]['host']} -u#{db_info[fetch(:stage)]['username']} -p#{db_info[fetch(:stage)]['password']} #{db_info[fetch(:stage)]['database']} < #{args.target_directory}/wordpress.sql"
+      execute "mysql -h#{db_info[fetch(:stage).to_s]['host']} -u#{db_info[fetch(:stage).to_s]['username']} -p#{db_info[fetch(:stage).to_s]['password']} #{db_info[fetch(:stage).to_s]['database']} < #{args.target_directory}/wordpress.sql"
+    end
+  end
+
+  desc 'Sync local DB to remote DB'
+  task :sync, [:target_directory] do |t, args|
+    on roles(:web) do
+      download! "#{args.target_directory}/wordpress.sql", "db/active/wordpress.sql"
     end
   end
 
   desc 'Clear remote backup records'
   task :clear_remote_backups do
     on roles(:web) do
-      execute "rm #{deploy_path}/db/backups/#{fetch(:stage)}/*.sql"
+      execute "rm #{deploy_path}/db/backups/#{fetch(:stage).to_s}/*.sql"
     end
   end
 
@@ -246,79 +253,93 @@ namespace :db do
       if File.exist? 'db/active/wordpress.sql'
         execute "mkdir -p #{deploy_path}/db/"
         upload! 'db/active/wordpress.sql', "#{deploy_path}/db/wordpress.sql"
-        execute "mysql -h#{db_info[fetch(:stage)]['host']} -u#{db_info[fetch(:stage)]['username']} -p#{db_info[fetch(:stage)]['password']} #{db_info[fetch(:stage)]['database']} < #{deploy_path}/db/wordpress.sql"
+        execute "mysql -h#{db_info[fetch(:stage).to_s]['host']} -u#{db_info[fetch(:stage).to_s]['username']} -p#{db_info[fetch(:stage).to_s]['password']} #{db_info[fetch(:stage).to_s]['database']} < #{deploy_path}/db/wordpress.sql"
       end
     end
   end
 end
 
 namespace :data do
-  desc 'Backup data'
-  task :backup do
-    on roles(:web) do
-      download! "#{deploy_path}/shared/public/wp-content/uploads", './public/wp-content/', recursive: true
-      download! "#{deploy_path}/shared/public/wp-content/plugins", './public/wp-content/', recursive: true
-      download! "#{deploy_path}/shared/public/wp-content/upgrade", './public/wp-content/', recursive: true
-      download! "#{deploy_path}/current/public/wp-content/themes", './public/wp-content/', recursive: true
-    end
-  end
-
-  desc 'Create data snapshot to latest_release directory with rsync'
-  task :sync_snapshot, [:target_directory] do |t, args|
-    on roles(:web) do
-      execute "mkdir -p #{target_directory}"
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/uploads`
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/plugins`
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/upgrade #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/upgrade`
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/themes`
-    end
-  end
+  # desc 'Backup data'
+  # task :backup do
+  #   on roles(:web) do
+  #     download! "#{deploy_path}/shared/public/wp-content/uploads", './public/wp-content/', recursive: true
+  #     download! "#{deploy_path}/shared/public/wp-content/plugins", './public/wp-content/', recursive: true
+  #     download! "#{deploy_path}/shared/public/wp-content/upgrade", './public/wp-content/', recursive: true
+  #     download! "#{deploy_path}/current/public/wp-content/themes", './public/wp-content/', recursive: true
+  #   end
+  # end
 
   desc 'Create data snapshot to latest_release directory'
   task :snapshot, [:target_directory] do |t, args|
     on roles(:web) do
-      # TODO
-      execute "mkdir -p #{target_directory}"
-    end
-  end
-
-  desc 'Restore data from latest_release directory snapshot with rsync'
-  task :sync_restore, [:target_directory] do |t, args|
-    on roles(:web) do
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/uploads #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads`
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/plugins #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins`
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/upgrade #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/upgrade`
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{args.target_directory}/public/wp-content/themes #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes`
+      execute "mkdir -p #{args.target_directory}"
+      execute "rm -rf #{args.target_directory}/public/wp-content/uploads/*"
+      execute "rm -rf #{args.target_directory}/public/wp-content/plugins/*"
+      execute "rm -rf #{args.target_directory}/public/wp-content/upgrade/*"
+      execute "rm -rf #{args.target_directory}/public/wp-content/themes/*"
+      execute "cp -r #{deploy_path}/shared/public/wp-content/uploads #{args.target_directory}/public/wp-content/uploads"
+      execute "cp -r #{deploy_path}/shared/public/wp-content/plugins #{args.target_directory}/public/wp-content/plugins"
+      execute "cp -r #{deploy_path}/shared/public/wp-content/upgrade #{args.target_directory}/public/wp-content/upgrade"
+      execute "cp -r #{deploy_path}/current/public/wp-content/themes #{args.target_directory}/public/wp-content/themes"
     end
   end
 
   desc 'Restore data from latest_release directory snapshot'
   task :restore, [:target_directory] do |t, args|
     on roles(:web) do
-      # TODO
+      execute "rm -rf #{deploy_path}/shared/public/wp-content/uploads/*"
+      execute "rm -rf #{deploy_path}/shared/public/wp-content/plugins/*"
+      execute "rm -rf #{deploy_path}/shared/public/wp-content/upgrade/*"
+      execute "rm -rf #{deploy_path}/current/public/wp-content/themes/*"
+      execute "cp -r #{args.target_directory}/public/wp-content/uploads #{deploy_path}/shared/public/wp-content/uploads"
+      execute "cp -r #{args.target_directory}/public/wp-content/plugins #{deploy_path}/shared/public/wp-content/plugins"
+      execute "cp -r #{args.target_directory}/public/wp-content/upgrade #{deploy_path}/shared/public/wp-content/upgrade"
+      execute "cp -r #{args.target_directory}/public/wp-content/themes  #{deploy_path}/current/public/wp-content/themes"
     end
   end
 
-  desc 'Backup data with rsync'
-  task :sync_backup do
+  desc 'Sync local uploads/content files to remote uploads/content files'
+  task :sync, [:target_directory] do |t, args|
     on roles(:web) do
-      puts 'Syncing Backup...'
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads/ ./public/wp-content/uploads/`
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins/ ./public/wp-content/plugins/`
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/upgrade/ ./public/wp-content/upgrade/`
-      `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/ ./public/wp-content/themes/`
+      FileUtils.rm_f('./public/wp-content/uploads')
+      FileUtils.rm_f('./public/wp-content/plugins')
+      FileUtils.rm_f('./public/wp-content/upgrade')
+      FileUtils.rm_f('./public/wp-content/themes')
+      download! "#{args.target_directory}/public/wp-content/uploads", './public/wp-content/', recursive: true
+      download! "#{args.target_directory}/public/wp-content/plugins", './public/wp-content/', recursive: true
+      download! "#{args.target_directory}/public/wp-content/upgrade", './public/wp-content/', recursive: true
+      download! "#{args.target_directory}/public/wp-content/themes", './public/wp-content/', recursive: true
     end
   end
+
+  # desc 'Backup data with rsync'
+  # task :sync_backup do
+  #   on roles(:web) do
+  #     puts 'Syncing Backup...'
+  #     `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/uploads/ ./public/wp-content/uploads/`
+  #     `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/plugins/ ./public/wp-content/plugins/`
+  #     `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/shared/public/wp-content/upgrade/ ./public/wp-content/upgrade/`
+  #     `rsync -avzPhu --delete #{deploy_user}@#{host_addr}:#{deploy_path}/current/public/wp-content/themes/ ./public/wp-content/themes/`
+  #   end
+  # end
 end
 
-desc 'Backup DB and remote uploads/content'
-task :backup do
-  invoke('db:backup')
-  if disable_rsync
-    invoke('data:backup')
-  else
-    invoke('data:sync_backup')
-  end
+# desc 'Backup DB and remote uploads/content'
+# task :backup do
+#   invoke('db:backup')
+#   if disable_rsync
+#     invoke('data:backup')
+#   else
+#     invoke('data:sync_backup')
+#   end
+# end
+
+desc 'Create current DB and remote uploads/content files and sync local to remote'
+task :sync do
+  invoke('snapshot')
+  invoke('db:sync')
+  invoke('data:sync')
 end
 
 desc 'Excute snapshot before deploy'
@@ -326,29 +347,21 @@ task :snapshot do
   on roles(:web) do
     unless test("[ -d #{fetch(:deploy_to)} ]")
       latest_release = Dir.glob(File.join("#{deploy_path}/releases", '*/')).max_by { |f| File.mtime(f) }
-      target_directory = "#{deploy_path}/snapshot/#{fetch(:stage)}/#{args.latest_release}"
+      target_directory = "#{deploy_path}/snapshot/#{fetch(:stage).to_s}/#{latest_release}"
       invoke('db:snapshot', "#{target_directory}/db")
-      if disable_rsync
-        invoke('data:snapshot', target_directory)
-      else
-        invoke('data:sync_snapshot', target_directory)
-      end
+      invoke('data:snapshot', target_directory)
     end
   end
 end
-before :starting, :snapshot
+before 'deploy:starting', :snapshot
 
 desc 'Excute restore after rollback'
 task :restore do
   on roles(:web) do
     latest_release = Dir.glob(File.join("#{deploy_path}/releases", '*/')).max_by { |f| File.mtime(f) }
-    target_directory = "#{deploy_path}/snapshot/#{fetch(:stage)}/#{args.latest_release}"
+    target_directory = "#{deploy_path}/snapshot/#{fetch(:stage).to_s}/#{latest_release}"
     invoke('db:restore', "#{target_directory}/db")
-    if disable_rsync
-      invoke('data:restore', target_directory)
-    else
-      invoke('data:sync_restore', target_directory)
-    end
+    invoke('data:restore', target_directory)
   end
 end
-after :finishing_rollback, :restore
+after 'deploy:finishing_rollback', :restore
