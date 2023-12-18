@@ -1,6 +1,5 @@
 require 'erb'
 require 'yaml'
-require 'ostruct'
 
 def generate_wp_config(profile = 'production', out_path = './')
   require_relative 'gen_salts' # Generate salts if necessary
@@ -13,6 +12,6 @@ def generate_wp_config(profile = 'production', out_path = './')
 
   erb_source = File.read("#{config_path}/deploy-tools/wp-config.php.erb")
   rend = ERB.new(erb_source)
-  res = rend.result(vars.instance_eval { binding })
+  res = rend.result(Struct.new(*vars.keys).new(*vars.values).instance_eval { binding })
   File.write("#{out_path}/wp-config.php", res)
 end
