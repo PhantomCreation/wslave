@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.email       = 'info@phantom.industries'
   s.homepage    = 'https://github.com/PhantomCreation/wslave'
 
-  s.required_ruby_version = '>= 3.2'
+  s.required_ruby_version = '>= 3.0'
   s.files =       Dir.glob('lib/**/*.rb', File::FNM_DOTMATCH) +
                   Dir.glob('bin/**/*.rb', File::FNM_DOTMATCH) +
                   Dir.glob('base/**/*', File::FNM_DOTMATCH) +

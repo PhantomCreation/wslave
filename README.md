@@ -319,9 +319,9 @@ Caution
 =======
 1. Even though Capistrano is bening used for deployment, many files such as the wordpress 
   installation files are not committed. Other files are generated dynamically. Because of this, 
-	some files are deployed that are not/never included in the git repository, and you should be 
-	careful that your repository and local development files appropriately match. This also, 
-	unforunately, can make automated deployments somewhat complicated.
+  some files are deployed that are not/never included in the git repository, and you should be 
+  careful that your repository and local development files appropriately match. This also, 
+  unforunately, can make automated deployments somewhat complicated.
 2. URL replacement: WordPress doesn't use relative paths and hard-codes URLs in the database 
   (which is a terrible way to manage URLs and should be refactored in WP core...). Because of 
   this we need to replace URL entries depending on where we are running the site. During 
