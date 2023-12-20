@@ -2,22 +2,23 @@ require 'fileutils'
 require 'rubygems'
 require_relative 'wslave_tools'
 
+##
+# Handles updating the toolchain in a wslave project.
 class WSlaveUpdate
-  def initialize()
+  def initialize
     puts '⚙ Updating Toolchain・・・'
 
     path = Dir.pwd
-    if !File.exist?("#{path}/config/.wslave")
-    	puts "!!!This command must be run in a WSlave generated project!!!"
-	    return
+    unless File.exist?("#{path}/config/.wslave")
+      puts '!!!This command must be run in a WSlave generated project!!!'
+      return
     end
 
     base_path = File.expand_path "#{__dir__}/../base/"
     template_path = File.expand_path "#{__dir__}/../templates/"
 
-
     Dir.chdir path
-    
+
     FileUtils.cp("#{base_path}/Capfile", "#{path}/Capfile")
     # FileUtils.cp("#{base_path}/Gemfile", "#{path}/Gemfile")
     FileUtils.cp("#{base_path}/Rakefile", "#{path}/Rakefile")
@@ -26,14 +27,14 @@ class WSlaveUpdate
     FileUtils.cp("#{base_path}/public/.htaccess", "#{path}/public/.htaccess")
     FileUtils.cp("#{base_path}/public/wp-config.php", "#{path}/public/wp-config.php")
     FileUtils.cp_r(Dir.glob("#{base_path}/config/*"), "#{path}/config")
-    FileUtils.cp("#{template_path}/config/database.yml", "#{path}/config/database.yml") unless File.exist?  "#{path}/config/database.yml"
-    FileUtils.cp("#{template_path}/config/definitions.yml", "#{path}/config/definitions.yml") unless File.exist?  "#{path}/config/definitions.yml"
+    FileUtils.cp("#{template_path}/config/database.yml", "#{path}/config/database.yml") unless File.exist? "#{path}/config/database.yml"
+    FileUtils.cp("#{template_path}/config/definitions.yml", "#{path}/config/definitions.yml") unless File.exist? "#{path}/config/definitions.yml"
 
-    spec = Gem::Specification::load("#{__dir__}/../wslave.gemspec")
+    spec = Gem::Specification.load("#{__dir__}/../wslave.gemspec")
     FileUtils.rm("#{path}/config/.wslave")
-    File.open("#{path}/config/.wslave", 'w') {|f| f.write(spec.version)}
+    File.write("#{path}/config/.wslave", spec.version)
 
     Dir.chdir path
-    WSlaveTools.set_dev_perms(path) 
+    WSlaveTools.set_dev_perms(path)
   end
 end
