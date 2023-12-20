@@ -5,6 +5,8 @@ require 'git'
 
 require_relative 'wslave_tools'
 
+##
+# Toolchain to create new wslave projects.
 class WSlaveNew
   def initialize(path, version = '', wspath = '', wppath = '')
     puts '⚙ Initializing Toolchain・・・'

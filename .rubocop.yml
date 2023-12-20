@@ -1,4 +1,4 @@
-:qAllCops:
+AllCops:
   TargetRubyVersion: 3.0
   NewCops: enable
   Exclude:
@@ -20,4 +20,7 @@ Metrics/MethodLength:
   Enabled: false
 
 Style/OptionalBooleanParameter:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
   Enabled: false

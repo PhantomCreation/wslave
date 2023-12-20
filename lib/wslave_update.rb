@@ -2,6 +2,8 @@ require 'fileutils'
 require 'rubygems'
 require_relative 'wslave_tools'
 
+##
+# Handles updating the toolchain in a wslave project.
 class WSlaveUpdate
   def initialize
     puts '⚙ Updating Toolchain・・・'

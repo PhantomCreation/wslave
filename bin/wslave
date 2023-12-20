@@ -2,6 +2,8 @@
 require 'thor'
 require 'fileutils'
 
+##
+# The wslave command line interface.
 class WSlaveCLI < Thor
   def self.exit_on_failure?
     true
@@ -47,6 +49,8 @@ class WSlaveCLI < Thor
     WSlaveTools.sync
   end
 
+  ##
+  # Development server control commands.
   class Server < Thor
     desc 'start [options]', 'Starts the development server'
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'

@@ -1,6 +1,9 @@
 require_relative 'wslave_tools'
 require 'fileutils'
 
+##
+# Local development server docker image/container provisioning and control
+# utilites.
 class WSlaveDocker
   def initialize
     puts 'Initializing WSlave Docker Control'

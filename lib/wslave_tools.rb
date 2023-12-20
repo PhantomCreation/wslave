@@ -1,5 +1,7 @@
 require 'fileutils'
 
+##
+# Various tools, utilities, and helpers for wslave.
 class WSlaveTools
   def self.wslave_root?
     return true if File.exist?('./config/.wslave') &&
