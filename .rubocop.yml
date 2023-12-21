@@ -22,8 +22,5 @@ Metrics/MethodLength:
 Style/OptionalBooleanParameter:
   Enabled: false
 
-Style/OptionalBooleanParameter:
-  Enabled: false
-
 Style/FrozenStringLiteralComment:
   Enabled: false
