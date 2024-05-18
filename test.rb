@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 puts '>> Changing directory to ensure isolation.'
 Dir.chdir(__dir__)
 

@@ -95,6 +95,12 @@ class WSlaveCLI < Thor
       require_relative '../lib/wslave_docker'
       WSlaveDocker.new.console
     end
+
+    desc 'snapshot', 'Takes a backup snapshot of the development database and makes it active.'
+    def snapshot
+      require_relative '../lib/wslave_database'
+      WSlaveDatabase.new.dev_snapshot
+    end
   end
   desc 'server COMMAND [options]', 'Control the development server container'
   subcommand 'server', Server
