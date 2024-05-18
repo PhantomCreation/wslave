@@ -2,6 +2,7 @@
 *.swo
 *.orig
 Session.vim
+.ruby-version
 
 /tmp
 /testing
