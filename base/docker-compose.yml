@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: mariadb:11.2-jammy
+    image: mariadb:lts
     volumes:
       - "./db/dev:/db"
       - "./db/active:/docker-entrypoint-initdb.d"

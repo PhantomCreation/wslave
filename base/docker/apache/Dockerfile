@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.3.7-apache
 
 RUN a2enmod rewrite
 RUN service apache2 restart

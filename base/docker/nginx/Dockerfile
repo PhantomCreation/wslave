@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 RUN apt-get update && apt-get dist-upgrade -y
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
@@ -21,7 +21,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # NOTE: When the PHP FPM version changes, you MUST change the
 #   version definition right below this comment, then you must
 #   rebuild the nweb image!
-ARG PHP_FPM_VERSION=8.1
+ARG PHP_FPM_VERSION=8.3
 RUN mkdir -p /run/php
 COPY php.ini /etc/php/$PHP_FPM_VERSION/fpm/php.ini
 RUN ln -s /usr/sbin/php-fpm$PHP_FPM_VERSION /usr/sbin/php-fpm
