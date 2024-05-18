@@ -4,9 +4,7 @@ WSlave, short for "word slave", is a WordPress control tool.
   
 *"Word Slave" is an archaic term that refers to someone being bound to [a slave to] the words of 
 a contract. Since most WordPress work is usually done under contract the naming seemed 
-doubly-appropriate. The name make no reference to actual slavery, and we have no particular 
-intention of changing the name; but if, even after reading this explanation, you feel the name 
-is inappropriate, then please suggest an alternative and we may consider changing the name.*
+doubly-appropriate. The name make no reference to actual slavery.*
 
 Details
 -------
@@ -34,7 +32,7 @@ put up on shared hosts etc.
 
 Requirements
 ============
-*Short list*: ruby, git, docker with docker-compose, \*nix/POSIX compliant terminal/shell.
+*Short list*: ruby, git, docker with docker-compose(v2), \*nix/POSIX compliant terminal/shell.
   
 *Detailed list*
 1. A user who belongs to the 'www-data' group (only required to set write permissions for Docker).
@@ -43,31 +41,9 @@ Requirements
 3. A properly installed Git.
 4. A full Docker installation including docker-compose.
 5. A working and accessable installation of PHP composer.
-6. Preferably a POSIX compliant shell with standard tools such as BASH/DASH/ZSH in Linux, OS-X, 
+6. A POSIX compliant shell with standard tools, such as BASH/DASH/ZSH in Linux, OS-X, 
 	or MSYS2 or WSL2 in Windows.
-
-Re: Windows
------------
-wslave is not actively maintained on Windows, but as of this writing it has been tested and runs 
-in WSL2 on both Pro and non-Pro versions, or for Pro versions in MSYS2, CMD with POSIX tools 
-enabled (ls, cd, mkdir, chown, chmod...), or PowerShell.  
-  
-Running under WSL2 is generally easier regardless of if you have a Pro version of Windows:
-simply install Ruby, Docker, etc., and add your user to the www-data group (as per the standard 
-Linux setup).  
-  
-Running under MSYS2 requires you install Ruby, PHP, etc. within MSYS2 and set your environment 
-variables properly to allow docker and docker-compose to be run from within MSYS2.  
-  
-Running from CMD or PowerShell requires a regular Windows Ruby installations and probably some 
-tweaking of your environment. This is the most complex setup as it requires a lot of system 
-specific environment settings and there's a variety of issues that can arrise due to CMD and 
-PowerShell not really being properly POSIX compliant / completely compatible with \*nix style 
-tools. 
-  
-All things considered running under WSL2 is recommended as it maintains the higest compatibility 
-with the lowest ammount of setting and tweaking environment variables - and it doesn't require 
-a Pro version of Windows to run the container VMs.
+※ For more information about Windows, see: [doc/WINDOWS.md].
 
 Installation
 ============
@@ -90,7 +66,8 @@ wslave new myblog
 ```
 If you are going to be developing wslave, you can specify the path of your local wslave 
 and this will be automatically set in the Gemfile of the generated project (*NOTE: 
-this path is relative to the project, not where you are running the command*):
+this path is relative to the project directory, not from where you are running the 
+command*):
 ```sh
 wslave new myblog --wspath ../wslave
 ```
@@ -104,6 +81,8 @@ If you want to specify a specific verison of WordPress to use, you can do so lik
 ```sh
 wslave new myblog --version 5.2
 ```
+After creating your project, all wslave commands for that project must be run within the 
+project root directory.
   
 You now have a variety of rake tasks and a pre-configured Capistrano configuration.  
 First, try starting up a local development server:
