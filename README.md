@@ -195,6 +195,13 @@ command after cloning the repository and running `bundle install`. Keep in mind 
 need a user account that is a member of the 'www-data' account on your local system if you are 
 using a \*nix OS.
 
+!WARNING!
+---------
+Currently there are multiple issues with depenedencies for what is currently the stable version 
+(9) of Sage. Because of this, wslave defaults to using the in-development version. If you need 
+to use Sage 9 we recommend you don't use the wslave shortcuts and helpers for Sage.  
+※This warning will be removed when Sage 10 is officially released.
+
 Updating
 --------
 wslave will update to the newest version when you run ```bundle update```. Before you update, 
@@ -302,7 +309,47 @@ Extra Functionality
 ===================
 wslave integrates/allows for some other tools to be run comfortably within the wslave installation. 
 Currently these include:
+* Sage theme generation and management helpers from the wslave command.
 * wp-cli from the installation directory.
+
+Sage Themes
+-----------
+wslave has integrated Sage theme helpers.
+
+### Existing Sage Themes
+If you have an extisting Sage theme you will need to 
+copy the files into public/wp-content/themes/"theme name" (replacing "theme name" with the actual 
+name of your theme). Then create a config file at `config/sage.yml` with the following 
+content:
+```yml
+---
+:theme: "theme name"
+```
+(Again, replacing "theme name" with the name of your theme). 
+
+### New Sage Themes
+You can create a new sage theme with ```wslave sage new theme_name```, repacing theme_name with 
+the name of the theme you wish to create.  
+**CAUTION** When/if asked ```Do you want to remove the existing VCS (.git, .svn..) history?``` 
+answer **n**. Otherwise you will have to re-add all the wslave project files to git. We have no 
+idea why Sage does this...
+
+### Updating/Installing Packages
+You can of course work directly with yarn/composer in your theme directory, or use 
+```wslave sage update```.
+
+### Building Theme Files
+You can of course work directly with yarn/composer in your theme directory, or use 
+```wslave sage build```
+
+### Produciton Build and Deployment
+For static deployment we don't want to commit the vendor and dist directories to SCM, so there's 
+an extra task in Capistrano that's been added to do this for us if you're using the wslave 
+deployment chain. The command to do this would be ```cap staging deploy:sage``` or 
+```cap production deploy:sage``` for staging or production respectively.  
+  
+To do a production build without Capistrano simply use ```wslave sage production``` and assets 
+will be compiled and placed in the appropriate locations in your theme directory.
 
 wp-cli
 ------
@@ -318,10 +365,11 @@ ownership/file monitorning in the future). You may need to run `wslave sync` or
 Caution
 =======
 1. Even though Capistrano is bening used for deployment, many files such as the wordpress 
-  installation files are not committed. Other files are generated dynamically. Because of this, 
-  some files are deployed that are not/never included in the git repository, and you should be 
-  careful that your repository and local development files appropriately match. This also, 
-  unforunately, can make automated deployments somewhat complicated.
+  installation and Sage static build (production) files are not committed. Other files are 
+  generated dynamically. Because of this, some files are deployed that are not/never included 
+  in the git repository, and you should be careful that your repository and local development 
+  files appropriately match. This also, unforunately, can make automated deployments somewhat 
+  complicated.
 2. URL replacement: WordPress doesn't use relative paths and hard-codes URLs in the database 
   (which is a terrible way to manage URLs and should be refactored in WP core...). Because of 
   this we need to replace URL entries depending on where we are running the site. During 
@@ -329,7 +377,11 @@ Caution
   localhost:8000, and then these localhost:8000 entries are converted to production or staging 
   URLs on deployment. If you have an article or something that explicitly used localhost:8000 
   this would end up getting changed to the production or staging URL during deployment.
-3. Permissions: When working on themes or extensions you may encounter many permission issues 
+3. Sage version: Due to Sage v9 being massively outdated, wslave Sage theme creation currently 
+  defaults to the upstream dev version (Sage 10 beta). If you would like to use version 9, 
+  please create the theme manually with composer and add the "sage.yml" file as described above 
+  in the Sage Theme section.
+4. Permissions: When working on themes or extensions you may encounter many permission issues 
   with files not being read due to them not being owned by the www-data group. You may have to 
   periodically run ```wslave sync``` or manually chown files (EG: ```chown -R :www-data ./``` 
   in the directory you are working in).
@@ -352,10 +404,11 @@ phpenv repository with install instructions for phpenv and php-build can be foun
 
 gyp
 ---
-One of the requirements for a variety of node packages used in various other JavaScript/node based 
-tools is gyp [node-gyp], which is notorious for having installation issues which will break a lot 
-of setup scripts and can cause issues. If you encounter an issue during a gyp installation we've 
-found the following commands seem to fix it fairly often (*YMMV):
+One of the requirements for a variety of node packages used in Sage theme development and in 
+various other JavaScript/node based tools is gyp [node-gyp], which is notorious for 
+having installation issues which will break a lot of setup scripts and can cause issues. If you 
+encounter an issue during a gyp installation we've found the following commands seem to fix it 
+fairly often (*YMMV):
 ```
 npm install --global node-gyp@latest
 npm config set node_gyp $(npm prefix -g)/lib/node_modules/node-gyp/bin/node-gyp.js

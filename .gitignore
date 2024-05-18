@@ -1,8 +1,5 @@
 *.swp
 *.swo
-*.orig
-Session.vim
-
 /tmp
 /testing
 /dist/wordpress
