@@ -30,7 +30,7 @@ class WSlaveCLI < Thor
       copy it. Also, if there is data here that does not match the format of the official WordPress repository,
       most wslave functionality will probably be broken.'
   def new(path = './')
-    require_relative '../lib/wslave_new'
+    require_relative '../lib/wslave/new'
     real_path = File.expand_path(path)
     WSlaveNew.new(real_path, options['version'], options['wspath'], options['wppath'])
   end
@@ -38,13 +38,13 @@ class WSlaveCLI < Thor
   desc 'update', 'Updates toolchain'
   long_desc 'Updates toolchain. Will not overwrite existing configuration files.'
   def update
-    require_relative '../lib/wslave_update'
+    require_relative '../lib/wslave/update'
     WSlaveUpdate.new
   end
 
   desc 'sync', 'Synchronizes submodules and file permissions'
   def sync
-    require_relative '../lib/wslave_tools'
+    require_relative '../lib/wslave/tools'
     puts 'Synchronizing...'
     WSlaveTools.sync
   end
@@ -56,7 +56,7 @@ class WSlaveCLI < Thor
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
     def start
       puts 'Starting server...'
-      require_relative '../lib/wslave_docker'
+      require_relative '../lib/wslave/docker'
       WSlaveDocker.new.server(:start, options['f'])
     end
 
@@ -64,7 +64,7 @@ class WSlaveCLI < Thor
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
     def stop
       puts 'Stopping server...'
-      require_relative '../lib/wslave_docker'
+      require_relative '../lib/wslave/docker'
       WSlaveDocker.new.server(:stop, options['f'])
     end
 
@@ -72,7 +72,7 @@ class WSlaveCLI < Thor
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
     def reset
       puts 'Stopping server...'
-      require_relative '../lib/wslave_docker'
+      require_relative '../lib/wslave/docker'
       WSlaveDocker.new.server(:reset, options['f'])
     end
 
@@ -80,25 +80,25 @@ class WSlaveCLI < Thor
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
     def remove
       puts 'Stopping server...'
-      require_relative '../lib/wslave_docker'
+      require_relative '../lib/wslave/docker'
       WSlaveDocker.new.server(:remove, options['f'])
     end
 
     desc 'log', 'Starts tracing the log'
     def log
-      require_relative '../lib/wslave_docker'
+      require_relative '../lib/wslave/docker'
       WSlaveDocker.new.log
     end
 
     desc 'console', 'Opens a shell/console connection in the nweb container (container must be running)'
     def console
-      require_relative '../lib/wslave_docker'
+      require_relative '../lib/wslave/docker'
       WSlaveDocker.new.console
     end
 
     desc 'snapshot', 'Takes a backup snapshot of the development database and makes it active.'
     def snapshot
-      require_relative '../lib/wslave_database'
+      require_relative '../lib/wslave/database'
       WSlaveDatabase.new.dev_snapshot
     end
   end

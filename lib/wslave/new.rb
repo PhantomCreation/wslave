@@ -3,7 +3,7 @@ require 'rubygems'
 require 'pathname'
 require 'git'
 
-require_relative 'wslave_tools'
+require_relative 'tools'
 
 ##
 # Toolchain to create new wslave projects.

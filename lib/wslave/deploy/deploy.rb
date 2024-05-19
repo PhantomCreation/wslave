@@ -1,6 +1,3 @@
-# config valid only for current version of Capistrano
-lock '3.18.0'
-
 require 'date'
 require 'yaml'
 opts = YAML.load_file('config/definitions.yml', aliases: true)

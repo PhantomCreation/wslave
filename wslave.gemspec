@@ -22,11 +22,6 @@ Gem::Specification.new do |s|
   s.bindir = 'bin'
   s.executables << 'wslave'
 
-  s.add_dependency 'capistrano', '= 3.18.1'
-  s.add_dependency 'capistrano-file-permissions', '~> 1.0', '1.0.0'
-  s.add_dependency 'capistrano-git-with-submodules', '~> 2.0', '2.0.6'
-  s.add_dependency 'capistrano-scm-copy', '~> 0.7', '0.7.0'
-
   s.add_dependency 'git', '~> 1.18', '1.18.0'
 
   s.add_dependency 'haikunator', '~> 1.1', '1.1.1'

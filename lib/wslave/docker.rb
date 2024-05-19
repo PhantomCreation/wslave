@@ -1,4 +1,4 @@
-require_relative 'wslave_tools'
+require_relative 'tools'
 require 'fileutils'
 
 ##
