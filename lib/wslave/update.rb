@@ -14,8 +14,8 @@ class WSlaveUpdate
       return
     end
 
-    base_path = File.expand_path "#{__dir__}/../base/"
-    template_path = File.expand_path "#{__dir__}/../templates/"
+    base_path = File.expand_path "#{__dir__}/../../base/"
+    template_path = File.expand_path "#{__dir__}/../../templates/"
 
     Dir.chdir path
 
@@ -24,11 +24,10 @@ class WSlaveUpdate
     FileUtils.cp("#{base_path}/docker-compose.yml", "#{path}/docker-compose.yml")
     FileUtils.cp("#{base_path}/public/.htaccess", "#{path}/public/.htaccess")
     FileUtils.cp("#{base_path}/public/wp-config.php", "#{path}/public/wp-config.php")
-    # FileUtils.cp_r(Dir.glob("#{base_path}/config/*"), "#{path}/config")
     FileUtils.cp("#{template_path}/config/database.yml", "#{path}/config/database.yml") unless File.exist? "#{path}/config/database.yml"
     FileUtils.cp("#{template_path}/config/definitions.yml", "#{path}/config/definitions.yml") unless File.exist? "#{path}/config/definitions.yml"
 
-    spec = Gem::Specification.load("#{__dir__}/../wslave.gemspec")
+    spec = Gem::Specification.load("#{__dir__}/../../wslave.gemspec")
     FileUtils.rm("#{path}/config/.wslave")
     File.write("#{path}/config/.wslave", spec.version)
 
