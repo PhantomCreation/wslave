@@ -22,8 +22,8 @@ class WSlaveNew
         base_path = File.expand_path "#{wspath}/base/"
         template_path = File.expand_path "#{wspath}/templates/"
       else
-        base_path = File.expand_path "#{path}/#{wspath}/base/"
-        template_path = File.expand_path "#{path}/#{wspath}/templates/"
+        base_path = "#{wspath}/base/"
+        template_path = "#{wspath}/templates/"
       end
     end
 
