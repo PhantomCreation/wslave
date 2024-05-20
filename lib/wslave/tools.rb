@@ -20,28 +20,10 @@ class WSlaveTools
     FileUtils.chown(nil, 'www-data', "#{path}/public/data")
     FileUtils.chmod(0o775, "#{path}/public/data")
 
-    FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/themes")
-    FileUtils.chmod(0o775, "#{path}/public/wp-content/themes")
-    # NOTE: The following lines have been commented out and "replaced" with
-    #   the above two, which grant blanket ownership to everything in
-    #   wp-content. If there are no problems with this going forward,
-    #   this note and the commented lines below should be deleted in a
-    #   future update.
-    # FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/themes")
-    # FileUtils.chmod(0775, "#{path}/public/wp-content/themes")
-
-    # FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/uploads")
-    # FileUtils.chmod(0775, "#{path}/public/wp-content/uploads")
-
-    # FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/plugins")
-    # FileUtils.chmod(0775, "#{path}/public/wp-content/plugins")
-    #
-    # unless Dir.exist?("#{path}/public/wp-content/upgrade")
-    #  FileUtils.mkdir("#{path}/public/wp-content/upgrade")
-    #  FileUtils.touch("#{path}/public/wp-content/upgrade/.gitkeep")
-    # end
-    # FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content/upgrade")
-    # FileUtils.chmod(0775, "#{path}/public/wp-content/upgrade")
+    FileUtils.chown(nil, 'www-data', "#{path}/public/wp-content")
+    FileUtils.chown(nil, 'www-data', Dir.glob("#{path}/public/wp-content/*"))
+    FileUtils.chmod(0o775, "#{path}/public/wp-content")
+    FileUtils.chmod(0o775, Dir.glob("#{path}/public/wp-content/*"))
 
     FileUtils.mkdir_p("#{path}/db")
     FileUtils.chown(nil, 'www-data', "#{path}/db")
