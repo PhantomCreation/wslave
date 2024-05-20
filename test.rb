@@ -21,4 +21,4 @@ puts '>> wslave installation created.'
 Dir.chdir("#{__dir__}/testing")
 
 puts '>> Starting server...'
-`bundle exec wslave server start`
+`bundle exec wslave dev start`

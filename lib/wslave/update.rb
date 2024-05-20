@@ -19,7 +19,6 @@ class WSlaveUpdate
 
     Dir.chdir path
 
-    FileUtils.cp("#{base_path}/Rakefile", "#{path}/Rakefile")
     FileUtils.cp_r("#{base_path}/docker", "#{path}/")
     FileUtils.cp("#{base_path}/docker-compose.yml", "#{path}/docker-compose.yml")
     FileUtils.cp("#{base_path}/public/.htaccess", "#{path}/public/.htaccess")

@@ -19,7 +19,7 @@ class WSlaveCLI < Thor
   desc 'new [APP_PATH]', 'Generate a new app at APP_PATH'
   long_desc 'Creates a new application in the current directory or in the specificed path.'
   option :version, default: '',
-                   desc: 'Specify the version, EG: "--version 5.3". To specify edge/development master use "--version edge".'
+                   desc: 'Specify the version, EG: "--version 6.5". To specify edge/development master use "--version edge".'
   option :wspath, default: '',
                   desc: 'specify the path to the wslave distribution, EG: "--wspath ../wslave".
       NOTE: This is relative to the new app path.'
@@ -50,8 +50,8 @@ class WSlaveCLI < Thor
   end
 
   ##
-  # Development server control commands.
-  class Server < Thor
+  # Development commands.
+  class Dev < Thor
     desc 'start [options]', 'Starts the development server'
     method_option :f, type: :boolean, default: false, description: 'force close other servers first'
     def start
@@ -102,8 +102,30 @@ class WSlaveCLI < Thor
       WSlaveDatabase.new.dev_snapshot
     end
   end
-  desc 'server COMMAND [options]', 'Control the development server container'
-  subcommand 'server', Server
+  desc 'dev COMMAND [options]', 'Local development server control and utilities.'
+  subcommand 'dev', Dev
+
+  class Staging < Thor
+    # TODO
+    desc 'ssh', 'Open an SSH session to the staging host site root.'
+    def ssh
+      # TODO
+      #exec("ssh #{@opts['deployer']['user']}@#{@opts['deployer']['host']['staging']} -t \"cd #{@opts['deployer']['root']}/#{@opts['deployer']['fqdn']['staging']}; exec $SHELL -l\"")
+    end
+  end
+  desc 'staging COMMAND [options]', 'Staging environment deploy and control.'
+  subcommand 'staging', Staging
+
+  class Production < Thor
+    # TODO
+    desc 'ssh', 'Open an SSH session to the staging host site root.'
+    def ssh
+      # TODO
+      #exec("ssh #{@opts['deployer']['user']}@#{@opts['deployer']['host']['production']} -t \"cd #{@opts['deployer']['root']}/#{@opts['deployer']['fqdn']['production']}; exec $SHELL -l\"")
+    end
+  end
+  desc 'production COMMAND [options]', 'Production environment deploy and control.'
+  subcommand 'production', Production
 end
 
 WSlaveCLI.start(ARGV)
