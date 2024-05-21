@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'yaml'
 
 ##
 # Various tools, utilities, and helpers for wslave.
@@ -80,5 +81,21 @@ class WSlaveTools
 
     update_submodules
     set_dev_perms
+  end
+
+  def self.web_server
+    return unless wslave_root?
+
+    @web_info = YAML.load_file('config/definitions.yml', aliases: true) if @web_info.nil?
+
+    @web_info
+  end
+
+  def self.db_server
+    return unless wslave_root?
+
+    @db_info = YAML.load_file('config/database.yml', aliases: true) if @db_info.nil?
+
+    @db_info
   end
 end

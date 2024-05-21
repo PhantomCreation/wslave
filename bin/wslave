@@ -109,8 +109,8 @@ class WSlaveCLI < Thor
     # TODO
     desc 'ssh', 'Open an SSH session to the staging host site root.'
     def ssh
-      # TODO
-      #exec("ssh #{@opts['deployer']['user']}@#{@opts['deployer']['host']['staging']} -t \"cd #{@opts['deployer']['root']}/#{@opts['deployer']['fqdn']['staging']}; exec $SHELL -l\"")
+      require_relative '../lib/wslave/remote'
+      WSlaveRemote.ssh(:staging)
     end
   end
   desc 'staging COMMAND [options]', 'Staging environment deploy and control.'
@@ -120,8 +120,8 @@ class WSlaveCLI < Thor
     # TODO
     desc 'ssh', 'Open an SSH session to the staging host site root.'
     def ssh
-      # TODO
-      #exec("ssh #{@opts['deployer']['user']}@#{@opts['deployer']['host']['production']} -t \"cd #{@opts['deployer']['root']}/#{@opts['deployer']['fqdn']['production']}; exec $SHELL -l\"")
+      require_relative '../lib/wslave/remote'
+      WSlaveRemote.ssh(:staging)
     end
   end
   desc 'production COMMAND [options]', 'Production environment deploy and control.'
