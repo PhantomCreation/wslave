@@ -105,23 +105,37 @@ class WSlaveCLI < Thor
   desc 'dev COMMAND [options]', 'Local development server control and utilities.'
   subcommand 'dev', Dev
 
+  ##
+  # Staging server control commands.
   class Staging < Thor
-    # TODO
     desc 'ssh', 'Open an SSH session to the staging host site root.'
     def ssh
       require_relative '../lib/wslave/remote'
       WSlaveRemote.ssh(:staging)
     end
+
+    desc 'sql', 'Opens an SQL client session to the staging DB.'
+    def sql
+      require_relative '../lib/wslave/remote'
+      WSlaveRemote.sql(:staging)
+    end
   end
   desc 'staging COMMAND [options]', 'Staging environment deploy and control.'
   subcommand 'staging', Staging
 
+  ##
+  # Production server control commands.
   class Production < Thor
-    # TODO
     desc 'ssh', 'Open an SSH session to the staging host site root.'
     def ssh
       require_relative '../lib/wslave/remote'
       WSlaveRemote.ssh(:staging)
+    end
+
+    desc 'sql', 'Opens an SQL client session to the production DB.'
+    def sql
+      require_relative '../lib/wslave/remote'
+      WSlaveRemote.sql(:staging)
     end
   end
   desc 'production COMMAND [options]', 'Production environment deploy and control.'
